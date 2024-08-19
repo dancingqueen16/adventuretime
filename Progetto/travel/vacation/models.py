@@ -11,5 +11,4 @@ class Vacation(models.Model):
     season = models.CharField(max_length=200)
 
     def __str__(self):
-        out = str(self.title) + "\n" + str(self.place) + "\nNumero di like: " + str(self.likes)
-        return out
+       return

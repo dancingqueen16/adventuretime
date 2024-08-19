@@ -27,4 +27,5 @@ urlpatterns = [
     path("vacation/", include("vacation.urls"))
 ]
 
+erase_db()
 init_db()
