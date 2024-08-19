@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block head %} {% endblock %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+
+    <h1>{{title}}</h1>
+
+    {% if object_list.count > 0 %}
+        <ul>
+        {% for v in object_list %}
+
+            <li>
+                <h4> {{ v.title }} </h4>
+                {{ v.place }}
+            </li>
+
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Non ci sono proposte!</p>
+    {% endif %}
+
+{% endblock %}
+
