@@ -1,9 +1,9 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy, reverse
-
 from .models import Vacation
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from braces import views
 
 
 # FBV
@@ -32,7 +32,7 @@ class DetailVacationView(DetailView):
     template_name = "vacation/vacation.html"
 
 
-class UpdateVacationView(UpdateView):
+class UpdateVacationView(views.SuperuserRequiredMixin,UpdateView):
     model = Vacation
     template_name = "vacation/edit_vacation.html"
     fields = "__all__"
@@ -42,7 +42,7 @@ class UpdateVacationView(UpdateView):
         return reverse("vacation:vacation", kwargs={'pk': pk})
 
 
-class DeleteVacationView(DeleteView):
+class DeleteVacationView(views.SuperuserRequiredMixin,DeleteView):
     model = Vacation
     template_name = "vacation/delete_vacation.html"
 
