@@ -9,7 +9,3 @@ class Vacation(models.Model):
     type = models.CharField(max_length=200)
     likes = models.IntegerField(default=0)
     season = models.CharField(max_length=200)
-
-    def __str__(self):
-       out = self.title
-       return out

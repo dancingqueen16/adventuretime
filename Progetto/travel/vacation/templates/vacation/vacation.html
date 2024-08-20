@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %} {{object.title}} {% endblock %}
+
+{% block content %}
+
+<h1>{{object.title}}</h1>
+
+<br>
+
+{{object.place}}
+{{object.season}}
+{{object.type}}
+{{object.price}}
+{{object.duration}}
+Numero di like: {{object.likes}}
+
+
+{% endblock %}

@@ -2,20 +2,22 @@
 
 {% block head %} {% endblock %}
 
-{% block title %}{{title}}{% endblock %}
+{% block title %} Lista Vacanze {% endblock %}
 
 {% block content %}
 
-    <h1>{{title}}</h1>
+    <h1>Lista Vacanze</h1>
 
-    {% if vacationlist.count > 0 %}
-        <ul>
-        {% for v in vacationlist %}
+    {% if object_list.count > 0 %}
 
-            <li> {{ v }} </li>
+        {% for v in object_list %}
+
+            <div class="card">
+                <p> {{ v.title }} </p>
+                <a href="{% url 'vacation:detailvacation' v.pk %}"></a>
+            </div>
 
         {% endfor %}
-        </ul>
     {% else %}
         <p>Non ci sono proposte!</p>
     {% endif %}
