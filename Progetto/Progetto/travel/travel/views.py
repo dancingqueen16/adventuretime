@@ -6,12 +6,18 @@ from django.urls import reverse_lazy
 
 
 def home_page(request):
-    response = "Benvenuto nel mio sito"
+    templ = "homepage.html"
+    ctx = {"title": "Lista di Vacanze"}
+    return render(request, template_name=templ, context=ctx)
 
-    return HttpResponse(response)
 
+def logging_out(request):
+    templ = "logging_out.html"
+    ctx = {"title": "Logout"}
+    return render(request, template_name=templ, context=ctx)
 
 class UserCreateView(CreateView):
     form_class = UserCreationForm
     template_name = "user_create.html"
     success_url = reverse_lazy("login")
+
