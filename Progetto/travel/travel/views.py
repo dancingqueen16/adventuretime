@@ -11,6 +11,11 @@ def home_page(request):
     return render(request, template_name=templ, context=ctx)
 
 
+def logging_out(request):
+    templ = "logging_out.html"
+    ctx = {"title": "Logout"}
+    return render(request, template_name=templ, context=ctx)
+
 class UserCreateView(CreateView):
     form_class = UserCreationForm
     template_name = "user_create.html"

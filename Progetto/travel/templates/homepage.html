@@ -8,8 +8,13 @@
 <h2>Homepage Sito</h2>
 
 <p>Comincia la navigazione</p>
-<a href="{% url 'login'%}">Login</a>
-<a href="{% url 'logout' %}">Logout</a>
+<button type="button">
+  <a href="{% url 'login'%}">Login</a>
+</button>
+
+<a href="{% url 'loggingout' %}">Logout</a>
 <a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
+<a href="{% url 'vacation:createvacation' %}">Crea Nuova Vacanza</a>
+<a href="{% url 'vacation:myprofile' %}">Profilo</a>
 
 {% endblock %}

@@ -18,4 +18,7 @@ Numero di like: {{object.likes}}
 <a href="{% url 'vacation:editvacation' object.pk %}">Modifica Vacanza</a>
 <a href="{% url 'vacation:deletevacation' object.pk %}">Elimina Vacanza</a>
 
+<a href="{% url 'homepage' %}">Torna alla Home</a>
+<a href="{% url 'vacation:vacationlist' %}">Lista Vacanze</a>
+
 {% endblock %}

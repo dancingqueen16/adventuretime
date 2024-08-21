@@ -1,9 +1,11 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
-from .models import Vacation
+from .models import Vacation, List, ListItem
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from braces import views
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 
 
 # FBV
@@ -20,7 +22,7 @@ class VacationListView(ListView):
     template_name = "vacation/vacationlist.html"
 
 
-class CreateVacationView(CreateView):
+class CreateVacationView(views.SuperuserRequiredMixin,CreateView):
     model = Vacation
     template_name = "vacation/create_vacation.html"
     fields = "__all__"
@@ -49,4 +51,9 @@ class DeleteVacationView(views.SuperuserRequiredMixin,DeleteView):
     def get_success_url(self):
         return reverse("vacation:vacationlist")
 
+
+@login_required
+def my_profile(request):
+    user = get_object_or_404(User, pk=request.user.pk)
+    return render(request,"vacation/myprofile.html")
 
