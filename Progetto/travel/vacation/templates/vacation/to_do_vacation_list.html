@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %} Vacanze Da Fare {% endblock %}
+
+{% block content %}
+
+ <h1>Le tue Vacanze da fare</h1>
+
+    <ul>
+        {% for vacation in vacations %}
+            <li>
+                <h2>{{ vacation.title }}</h2>
+                <p>Place: {{ vacation.place }}</p>
+                <p>Duration: {{ vacation.duration }}</p>
+                <p>Price: {{ vacation.price }}</p>
+                <p>Type: {{ vacation.type }}</p>
+                <p>Season: {{ vacation.season }}</p>
+            </li>
+        {% empty %}
+            <li>No vacations to do.</li>
+        {% endfor %}
+    </ul>
+
+
+<a href="{% url 'vacation:myprofile' %}">Indietro</a>
+
+{% endblock %}
