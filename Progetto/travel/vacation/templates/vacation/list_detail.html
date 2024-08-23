@@ -1,12 +1,11 @@
 {% extends "base.html" %} {% load static %} 
 
 {% block head %} {% endblock %} 
-{%block title %} Pagina delle Playlist {% endblock %} 
+{%block title %} Vacanze {{List.name}} {% endblock %}
 
 {% block content %}
 
-  <h1>List: {{ List.name }}</h1>
-  <p>Contenuto:</p>
+  <h1>Vacanze {{ List.name }}</h1>
 
   {% if List %}
     {% for vacation in List.vacations.all %}
@@ -15,6 +14,9 @@
   {% else %}
   <p>Non hai ancora creato nessuna lista.</p>
   {% endif %}
-  <
+
+  <a href="{% url 'vacation:all_lists' %}">Tutte le Liste</a>
+  <a href="{% url 'homepage' %}">Torna alla Home</a>
+
 
 {% endblock %}

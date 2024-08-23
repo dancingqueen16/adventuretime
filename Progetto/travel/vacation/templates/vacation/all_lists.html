@@ -3,20 +3,20 @@
 
 {% block head %} {% endblock %}
 
-{% block title %} Pagina delle Playlist {% endblock %}
+{% block title %} Pagina delle Liste {% endblock %}
 
 {% block content %}
 
-    <h1> Playlists di {{ user.username }}</h1>
+    <h1> Liste di {{ user.username }}</h1>
 
-    {% if List %}
-        {% for l in List %}
+    {% if Lists %}
+        {% for l in Lists %}
           📁 <a href="{% url 'vacation:listdetail' l.pk %}">Lista {{l}}</a>
         {% endfor %}
     {% else %}
         <p>Non hai ancora creato nessuna playlist.</p>
     {% endif %}
 
-
+   <a href="{% url 'homepage' %}">Torna alla Home</a>
 
 {% endblock %}

@@ -6,7 +6,6 @@
 
 <h2>{{ object.title }}</h2>
   <p>{{ object.place }} {{ object.season }} {{ object.type }} {{ object.price }} {{ object.duration }}</p>
-  <p>Numero di like: {{ object.likes }}</p>
 
 {% if messages %}
     <div>
@@ -17,6 +16,20 @@
       {% endfor %}
     </div>
   {% endif %}
+
+  {% if user.is_authenticated %}
+        <form method="POST" action="{% url 'vacation:like' object.pk %}">
+          {% csrf_token %}
+          {% if user in object.likes.all %}
+            <button type="submit" class="btn btn-danger">{{ object.like_count }} ❤️ like</button>
+          {% else %}
+            <button type="submit" class="btn btn-primary">{{ object.like_count }} 🩶 like</button>
+          {% endif %}
+        </form>
+      {% else %}
+        <button type="button" class="btn btn-danger" disabled>{{ object.like_count }} ❤️ like</button>
+      {% endif %}
+
 
 
   <h3>Aggiungi a una Lista</h3>

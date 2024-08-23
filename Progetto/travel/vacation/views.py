@@ -140,7 +140,7 @@ class VacationDetailView(views.LoginRequiredMixin,FormView, DetailView):
 class ListsView(views.LoginRequiredMixin, ListView):
     model = List
     template_name = "vacation/all_lists.html"
-    context_object_name = "list"
+    context_object_name = "Lists"
 
     def get_queryset(self):
         return List.objects.filter(user=self.request.user)
@@ -148,7 +148,18 @@ class ListsView(views.LoginRequiredMixin, ListView):
 
 class DetailListView(DetailView):
     model = List
-    template_name = "vacation/listdetail.html"
+    template_name = "vacation/list_detail.html"
     context_object_name = "List"
 
 
+
+@login_required
+def like_vacation(request, pk):
+    # Recupera l'oggetto Scheda
+    vacation = get_object_or_404(Vacation, pk=pk)
+    # Controlla se l'utente ha già messo un like a questo post
+    if request.user in vacation.likes.all():
+        vacation.likes.remove(request.user)
+    else:
+        vacation.likes.add(request.user)
+    return redirect(reverse("vacation:detailvacation", kwargs={"pk": pk}))
