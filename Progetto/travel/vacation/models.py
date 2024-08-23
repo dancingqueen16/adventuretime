@@ -52,15 +52,15 @@ class List(models.Model):
         return f"{self.name}"
 
 
-class VacationList(models.Model):
-    STATUS_CHOICES = [
-        ('TODO', 'To Do'),
-        ('DONE', 'Done'),
-    ]
+#class VacationList(models.Model):
+#    STATUS_CHOICES = [
+#        ('TODO', 'To Do'),
+#        ('DONE', 'Done'),
+#    ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    vacation = models.ManyToManyField("Vacation", related_name='list')
-    status = models.CharField(max_length=4, choices=STATUS_CHOICES)
-
-    def __str__(self):
-        return f"{self.status} - {self.user.username}" "list"
+#    user = models.ForeignKey(User, on_delete=models.CASCADE)
+#    vacation = models.ManyToManyField("Vacation", related_name='list')
+#    status = models.CharField(max_length=4, choices=STATUS_CHOICES)
+#
+#    def __str__(self):
+#        return f"{self.status} - {self.user.username}" "list"

@@ -1,0 +1,20 @@
+{% extends "base.html" %} {% load static %} 
+
+{% block head %} {% endblock %} 
+{%block title %} Pagina delle Playlist {% endblock %} 
+
+{% block content %}
+
+  <h1>List: {{ List.name }}</h1>
+  <p>Contenuto:</p>
+
+  {% if List %}
+    {% for vacation in List.vacations.all %}
+      <a href="{% url 'vacation:detailvacation' vacation.pk %}"><b>  {{ vacation }} </b></a>
+  {% endfor %} 
+  {% else %}
+  <p>Non hai ancora creato nessuna lista.</p>
+  {% endif %}
+  <
+
+{% endblock %}

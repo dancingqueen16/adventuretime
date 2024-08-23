@@ -1,12 +1,13 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
-from .models import Vacation, VacationList
+from .models import Vacation, List
 from .forms import AddToListForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
 from braces import views
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 # FBV
@@ -60,7 +61,7 @@ def my_profile(request):
 
 
 
-class VacationDetailView(views.LoginRequiredMixin, DetailView, FormView):
+'''class VacationDetailView(views.LoginRequiredMixin, DetailView, FormView):
     model = Vacation
     template_name = 'vacation/vacation.html'
     context_object_name = 'vacation'
@@ -107,24 +108,47 @@ class VacationDetailView(views.LoginRequiredMixin, DetailView, FormView):
 
     def form_invalid(self, form):
         # Override form_invalid to handle form errors
+        return self.render_to_response(self.get_context_data(form=form))'''
+
+
+class VacationDetailView(views.LoginRequiredMixin,FormView, DetailView):
+    model = Vacation
+    template_name = 'vacation/vacation.html'
+    form_class = AddToListForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        vacation = self.get_object()
+        list = form.get_or_create_list()
+        if list.vacations.filter(pk=vacation.pk).exists():
+            messages.warning(self.request, f'La vacanza "{vacation.title}" è già nella playlist "{list.name}".')
+        else:
+            list.vacations.add(vacation)
+            messages.success(self.request,
+                             f'La vacanza "{vacation.title}" è stata aggiunta alla playlist "{list.name}".')
+        return redirect('vacation:detailvacation', pk=vacation.pk)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'C\'è stato un problema con il tuo invio. Per favore, riprova.')
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class ToDoVacationListView(views.LoginRequiredMixin, ListView):
-    model = VacationList
-    template_name = 'vacation/to_do_vacation_list.html'
-    context_object_name = 'vacation_lists'
+class ListsView(views.LoginRequiredMixin, ListView):
+    model = List
+    template_name = "vacation/alllists.html"
+    context_object_name = "list"
 
     def get_queryset(self):
-        # Recupera tutte le liste di vacanze per l'utente con stato 'TODO'
-        return VacationList.objects.filter(user=self.request.user, status='TODO')
+        return List.objects.filter(autore=self.request.user)
 
 
-class DoneVacationListView(views.LoginRequiredMixin, ListView):
-    model = VacationList
-    template_name = 'vacation/done_vacation_list.html'
-    context_object_name = 'vacation_lists'
+class DetailListView(DetailView):
+    model = List
+    template_name = "vacation/listdetail.html"
+    context_object_name = "List"
 
-    def get_queryset(self):
-        # Recupera tutte le liste di vacanze per l'utente con stato 'DONE'
-        return VacationList.objects.filter(user=self.request.user, status='DONE')
+

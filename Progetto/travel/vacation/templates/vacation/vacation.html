@@ -4,23 +4,28 @@
 
 {% block content %}
 
-<h1>{{object.title}}</h1>
+<h2>{{ object.title }}</h2>
+  <p>{{ object.place }} {{ object.season }} {{ object.type }} {{ object.price }} {{ object.duration }}</p>
+  <p>Numero di like: {{ object.likes }}</p>
 
-<br>
+{% if messages %}
+    <div>
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
-{{object.place}}
-{{object.season}}
-{{object.type}}
-{{object.price}}
-{{object.duration}}
-Numero di like: {{object.likes}}
 
-<h4>Aggiungi a una lista</h4>
+  <h3>Aggiungi a una Lista</h3>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Aggiungi</button>
   </form>
+
 
 <a href="{% url 'vacation:editvacation' object.pk %}">Modifica Vacanza</a>
 <a href="{% url 'vacation:deletevacation' object.pk %}">Elimina Vacanza</a>
