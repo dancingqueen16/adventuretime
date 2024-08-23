@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %} {{object.title}} {% endblock %}
+
+{% block content %}
+
+<h1>{{object.title}}</h1>
+
+<br>
+
+{{object.place}}
+{{object.season}}
+{{object.type}}
+{{object.price}}
+{{object.duration}}
+Numero di like: {{object.likes}}
+
+<h4>Aggiungi a una lista</h4>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Aggiungi</button>
+  </form>
+
+<a href="{% url 'vacation:editvacation' object.pk %}">Modifica Vacanza</a>
+<a href="{% url 'vacation:deletevacation' object.pk %}">Elimina Vacanza</a>
+
+<a href="{% url 'homepage' %}">Torna alla Home</a>
+<a href="{% url 'vacation:vacationlist' %}">Lista Vacanze</a>
+
+<a href="{% url 'vacation:myprofile' %}">Profilo</a>
+
+{% endblock %}
