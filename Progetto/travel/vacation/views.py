@@ -139,11 +139,11 @@ class VacationDetailView(views.LoginRequiredMixin,FormView, DetailView):
 
 class ListsView(views.LoginRequiredMixin, ListView):
     model = List
-    template_name = "vacation/alllists.html"
+    template_name = "vacation/all_lists.html"
     context_object_name = "list"
 
     def get_queryset(self):
-        return List.objects.filter(autore=self.request.user)
+        return List.objects.filter(user=self.request.user)
 
 
 class DetailListView(DetailView):
