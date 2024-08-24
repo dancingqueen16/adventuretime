@@ -72,13 +72,39 @@ class VacationDetailView(FormView, DetailView):
 
     def form_valid(self, form):
         vacation = self.get_object()
-        list = form.get_or_create_list()
-        if list.vacations.filter(pk=vacation.pk).exists():
-            messages.warning(self.request, f'La vacanza "{vacation.title}" è già nella playlist "{list.name}".')
+        selected_list = form.get_or_create_list()
+
+        # Riferimenti ai nomi delle liste
+        fatti_list_name = 'Fatte'
+        da_fare_list_name = 'Da Fare'
+
+        # Ottenere le altre liste dell'utente
+        fatti_list = List.objects.filter(user=self.request.user, name=fatti_list_name).first()
+        da_fare_list = List.objects.filter(user=self.request.user, name=da_fare_list_name).first()
+
+        # Controlla se la vacanza è nella lista opposta
+        if selected_list.name == fatti_list_name:
+            # Se si aggiunge a "Fatte" e la vacanza è in "Da Fare", rimuoverla da "Da Fare"
+            if da_fare_list and da_fare_list.vacations.filter(pk=vacation.pk).exists():
+                da_fare_list.vacations.remove(vacation)
+                messages.info(self.request,
+                              f'La vacanza "{vacation.title}" è stata rimossa dalla lista "{da_fare_list_name}".')
+
+        elif selected_list.name == da_fare_list_name:
+            # Se si aggiunge a "Da Fare" e la vacanza è in "Fatte", non permettere l'aggiunta
+            if fatti_list and fatti_list.vacations.filter(pk=vacation.pk).exists():
+                messages.warning(self.request,
+                                 f'La vacanza "{vacation.title}" è già nella lista "{fatti_list_name}" e non può essere aggiunta a "{da_fare_list_name}".')
+                return redirect('vacation:detailvacation', pk=vacation.pk)
+
+        # Aggiungi la vacanza alla lista selezionata, se non è già presente
+        if selected_list.vacations.filter(pk=vacation.pk).exists():
+            messages.warning(self.request, f'La vacanza "{vacation.title}" è già nella lista "{selected_list.name}".')
         else:
-            list.vacations.add(vacation)
+            selected_list.vacations.add(vacation)
             messages.success(self.request,
-                             f'La vacanza "{vacation.title}" è stata aggiunta alla playlist "{list.name}".')
+                             f'La vacanza "{vacation.title}" è stata aggiunta alla lista "{selected_list.name}".')
+
         return redirect('vacation:detailvacation', pk=vacation.pk)
 
     def form_invalid(self, form):
@@ -97,7 +123,7 @@ class DoneVacations(views.LoginRequiredMixin, ListView):
 
 class ToDoVacations(views.LoginRequiredMixin, ListView):
     model = List
-    template_name = "vacation/donevacations.html"
+    template_name = "vacation/todovacations.html"
     context_object_name = "List"
 
     def get_queryset(self):
@@ -117,9 +143,20 @@ class LikedVacations(views.LoginRequiredMixin, ListView):
 def like_vacation(request, pk):
     # Recupera l'oggetto Scheda
     vacation = get_object_or_404(Vacation, pk=pk)
-    # Controlla se l'utente ha già messo un like a questo post
-    if request.user in vacation.likes.all():
-        vacation.likes.remove(request.user)
+
+    # Verifica se l'utente ha aggiunto questa vacanza alla lista "Fatte"
+    fatte_list = List.objects.filter(user=request.user, name="Fatte").first()
+
+    if fatte_list and fatte_list.vacations.filter(pk=vacation.pk).exists():
+        # Controlla se l'utente ha già messo un like a questa vacanza
+        if request.user in vacation.likes.all():
+            vacation.likes.remove(request.user)
+            messages.info(request, f'Hai rimosso il like dalla vacanza "{vacation.title}".')
+        else:
+            vacation.likes.add(request.user)
+            messages.success(request, f'Hai messo like alla vacanza "{vacation.title}".')
     else:
-        vacation.likes.add(request.user)
+        # Se la vacanza non è nella lista "Fatte", mostra un messaggio di avviso
+        messages.warning(request, 'Devi prima aggiungere questa vacanza alla tua lista "Fatte" per poter mettere like.')
+
     return redirect(reverse("vacation:detailvacation", kwargs={"pk": pk}))

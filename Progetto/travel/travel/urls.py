@@ -21,7 +21,7 @@ from .views import *
 from .initcmds import *
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
     path("home/", home_page, name="homepage"),
     path("", home_page, name="homepage"),
     path("", home_page, name="homepage"),

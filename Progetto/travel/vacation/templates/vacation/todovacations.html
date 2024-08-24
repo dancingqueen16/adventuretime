@@ -8,15 +8,16 @@
   <h1>Vacanze Da Fare</h1>
 
 
-  {% if List %}
-    {% for l in List %}
+  {% for l in List %}
+    {% if l.vacations.count > 0 %}
        {% for vacation in l.vacations.all %}
          <a href="{% url 'vacation:detailvacation' vacation.pk %}"><b>  {{ vacation.title }} </b></a>
       {% endfor %}
+    {% else %}
+       <p>Non sono presenti elementi in questa lista</p>
+    {% endif %}
   {% endfor %}
-  {% else %}
-  <p>Non hai ancora aggiunto niente a questa lista</p>
-  {% endif %}
+
 
   <a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
 <a href="{% url 'vacation:myprofile' %}">Profilo</a>
