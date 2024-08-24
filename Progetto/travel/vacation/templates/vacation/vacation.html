@@ -36,8 +36,13 @@
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Aggiungi</button>
+    {% if user.is_authenticated %}
+       <button type="submit" class="btn btn-primary">Aggiungi</button>
+    {% else %}
+      <button type="button" class="btn btn-danger" disabled>Aggiungi</button>
+    {% endif %}
   </form>
+
 
 
 <a href="{% url 'vacation:editvacation' object.pk %}">Modifica Vacanza</a>

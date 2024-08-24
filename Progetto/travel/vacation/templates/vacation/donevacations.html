@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% load static %}
+
+{% block head %} {% endblock %}
+{%block title %} Vacanze Fatte {% endblock %}
+
+{% block content %}
+
+  <h1>Vacanze Fatte</h1>
+
+
+  {% if List %}
+    {% for l in List %}
+       {% for vacation in l.vacations.all %}
+         <a href="{% url 'vacation:detailvacation' vacation.pk %}"><b>  {{ vacation.title }} </b></a>
+      {% endfor %}
+  {% endfor %}
+  {% else %}
+  <p>Non hai ancora aggiunto niente a questa lista</p>
+  {% endif %}
+
+  <a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
+<a href="{% url 'vacation:myprofile' %}">Profilo</a>
+  <a href="{% url 'homepage' %}">Torna alla Home</a>
+
+
+{% endblock %}

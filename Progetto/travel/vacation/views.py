@@ -60,58 +60,7 @@ def my_profile(request):
     return render(request,"vacation/myprofile.html")
 
 
-
-'''class VacationDetailView(views.LoginRequiredMixin, DetailView, FormView):
-    model = Vacation
-    template_name = 'vacation/vacation.html'
-    context_object_name = 'vacation'
-    form_class = AddToListForm
-
-    def get_success_url(self):
-        return reverse_lazy('vacation:detailvacation', kwargs={'pk': self.object.pk})
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form'] = self.get_form()
-        return context
-
-    def get(self, request, *args, **kwargs):
-        # Retrieve the vacation object
-        self.object = self.get_object()
-        # Create the form
-        form = self.get_form()
-        # Render the response
-        context = self.get_context_data(object=self.object, form=form)
-        return self.render_to_response(context)
-
-    def post(self, request, *args, **kwargs):
-        # Retrieve the vacation object
-        self.object = self.get_object()
-        # Create the form with POST data
-        form = self.get_form()
-        if form.is_valid():
-            status = form.cleaned_data['status']
-            # Create or update the VacationList
-            list, created = VacationList.objects.get_or_create(
-                user=request.user,
-                status=status
-            )
-            list.vacation.add(self.object)
-            list.save()
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-    def form_valid(self, form):
-        # Override form_valid to handle successful form submission
-        return super().form_valid(form)
-
-    def form_invalid(self, form):
-        # Override form_invalid to handle form errors
-        return self.render_to_response(self.get_context_data(form=form))'''
-
-
-class VacationDetailView(views.LoginRequiredMixin,FormView, DetailView):
+class VacationDetailView(FormView, DetailView):
     model = Vacation
     template_name = 'vacation/vacation.html'
     form_class = AddToListForm
@@ -137,20 +86,31 @@ class VacationDetailView(views.LoginRequiredMixin,FormView, DetailView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class ListsView(views.LoginRequiredMixin, ListView):
+class DoneVacations(views.LoginRequiredMixin, ListView):
     model = List
-    template_name = "vacation/all_lists.html"
-    context_object_name = "Lists"
-
-    def get_queryset(self):
-        return List.objects.filter(user=self.request.user)
-
-
-class DetailListView(DetailView):
-    model = List
-    template_name = "vacation/list_detail.html"
+    template_name = "vacation/donevacations.html"
     context_object_name = "List"
 
+    def get_queryset(self):
+        return List.objects.filter(user=self.request.user).filter(name='Fatte')
+
+
+class ToDoVacations(views.LoginRequiredMixin, ListView):
+    model = List
+    template_name = "vacation/donevacations.html"
+    context_object_name = "List"
+
+    def get_queryset(self):
+        return List.objects.filter(user=self.request.user).filter(name='Da Fare')
+
+
+class LikedVacations(views.LoginRequiredMixin, ListView):
+    model = Vacation
+    template_name = "vacation/likedvacations.html"
+    context_object_name = "Liked"
+
+    def get_queryset(self):
+        return Vacation.objects.filter(likes=self.request.user)
 
 
 @login_required

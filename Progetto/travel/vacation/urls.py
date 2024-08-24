@@ -11,6 +11,7 @@ urlpatterns = [
      path("editvacation/<int:pk>/", UpdateVacationView.as_view(), name="editvacation"),
      path("deletevacation/<pk>/", DeleteVacationView.as_view(), name="deletevacation"),
      path("myprofile", my_profile, name="myprofile"),
-     path("all_lists", ListsView.as_view(), name="all_lists"),
-     path("listdetail/<int:pk>", DetailListView.as_view(), name="listdetail")
+     path("donevacations", DoneVacations.as_view(), name="donevacations"),
+     path("todovacations", ToDoVacations.as_view(), name="todovacations"),
+     path("likedvacations", LikedVacations.as_view(), name="likedvacations")
    ]

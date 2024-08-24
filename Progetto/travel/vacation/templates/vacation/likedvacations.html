@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% load static %}
+
+{% block head %} {% endblock %}
+{%block title %} Vacanze Piaciute {% endblock %}
+
+{% block content %}
+
+  <h1>Vacanze Piaciute</h1>
+
+
+  {% if Liked %}
+       {% for vacation in Liked %}
+         <a href="{% url 'vacation:detailvacation' vacation.pk %}"><b>  {{ vacation.title }} </b></a>
+      {% endfor %}
+  {% else %}
+  <p>Non hai ancora aggiunto niente a questa lista</p>
+  {% endif %}
+
+  <a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
+<a href="{% url 'vacation:myprofile' %}">Profilo</a>
+  <a href="{% url 'homepage' %}">Torna alla Home</a>
+
+
+{% endblock %}

@@ -14,7 +14,16 @@
 
 <a href="{% url 'loggingout' %}">Logout</a>
 <a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
-<a href="{% url 'vacation:createvacation' %}">Crea Nuova Vacanza</a>
+
+{% if user.is_authenticated and user.is_superuser %}
+   <button type="button">
+    <a href="{% url 'vacation:createvacation' %}">Crea Nuova Vacanza</a>
+   </button>
+{% else %}
+   <button type="button" disabled>Crea Nuova Vacanza</button>
+{% endif %}
+
 <a href="{% url 'vacation:myprofile' %}">Profilo</a>
+<a href="{% url 'register' %}">Registrati</a>
 
 {% endblock %}
