@@ -24,11 +24,14 @@ class VacationListView(ListView):
     template_name = "vacation/vacationlist.html"
 
 
-class CreateVacationView(views.SuperuserRequiredMixin,CreateView):
+class CreateVacationView(views.SuperuserRequiredMixin, CreateView):
     model = Vacation
     template_name = "vacation/create_vacation.html"
     fields = "__all__"
     success_url = reverse_lazy("vacation_list")
+
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
 
 
 class DetailVacationView(DetailView):
@@ -41,6 +44,9 @@ class UpdateVacationView(views.SuperuserRequiredMixin,UpdateView):
     template_name = "vacation/edit_vacation.html"
     fields = "__all__"
 
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
+
     def get_success_url(self):
         pk = self.get_context_data()["object"].pk
         return reverse("vacation:vacation", kwargs={'pk': pk})
@@ -50,11 +56,14 @@ class DeleteVacationView(views.SuperuserRequiredMixin,DeleteView):
     model = Vacation
     template_name = "vacation/delete_vacation.html"
 
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
+
     def get_success_url(self):
         return reverse("vacation:vacationlist")
 
 
-@login_required
+@login_required(login_url=reverse_lazy('not_authorized'))
 def my_profile(request):
     user = get_object_or_404(User, pk=request.user.pk)
     return render(request,"vacation/myprofile.html")
@@ -117,6 +126,9 @@ class DoneVacations(views.LoginRequiredMixin, ListView):
     template_name = "vacation/donevacations.html"
     context_object_name = "List"
 
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
+
     def get_queryset(self):
         return List.objects.filter(user=self.request.user).filter(name='Fatte')
 
@@ -125,6 +137,9 @@ class ToDoVacations(views.LoginRequiredMixin, ListView):
     model = List
     template_name = "vacation/todovacations.html"
     context_object_name = "List"
+
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
 
     def get_queryset(self):
         return List.objects.filter(user=self.request.user).filter(name='Da Fare')
@@ -135,11 +150,14 @@ class LikedVacations(views.LoginRequiredMixin, ListView):
     template_name = "vacation/likedvacations.html"
     context_object_name = "Liked"
 
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
+
     def get_queryset(self):
         return Vacation.objects.filter(likes=self.request.user)
 
 
-@login_required
+@login_required(login_url=reverse_lazy('not_authorized'))
 def like_vacation(request, pk):
     # Recupera l'oggetto Scheda
     vacation = get_object_or_404(Vacation, pk=pk)

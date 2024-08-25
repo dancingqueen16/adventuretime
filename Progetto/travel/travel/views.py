@@ -22,3 +22,6 @@ class UserCreateView(CreateView):
     template_name = "user_create.html"
     success_url = reverse_lazy("login")
 
+
+def not_authorized_view(request):
+    return render(request, 'not_authorized.html', {})

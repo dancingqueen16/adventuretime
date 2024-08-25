@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Not Authorized {% endblock %}
+{% block header1 %}
+  <h1>Not Authorized</h1>
+{% endblock %}
+{% block content %}
+<h4>Se vedi questa pagina, vuol dire che non sei autorizzato a compiere l'operazione</h4>
+
+
+<a href="{% url 'homepage' %}">Home</a>
+
+
+
+{% endblock %}
