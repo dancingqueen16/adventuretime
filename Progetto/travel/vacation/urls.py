@@ -15,3 +15,4 @@ urlpatterns = [
      path("todovacations", ToDoVacations.as_view(), name="todovacations"),
      path("likedvacations", LikedVacations.as_view(), name="likedvacations")
    ]
+

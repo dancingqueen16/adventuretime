@@ -13,8 +13,9 @@
         {% for v in object_list %}
 
             <div class="card">
-                <a href="{% url 'vacation:detailvacation' v.pk %}">{{v.title}}</a>
-                <p>{{v.place}}</p>
+                <a href="{% url 'vacation:detailvacation' v.pk %}">{{v.titolo}}</a>
+                <p>{{v.luogo}}</p>
+                <p>{{v.descrizione}}</p>
             </div>
 
         {% endfor %}

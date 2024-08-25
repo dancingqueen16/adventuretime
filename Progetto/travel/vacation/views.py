@@ -10,15 +10,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 
-# FBV
-#def vacation_list(request):
-#    templ = "vacation/vacationlist.html"
-#    ctx = {"title": "Lista di Vacanze",
-#           "vacationlist": Vacation.objects.all()}
-#   return render(request, template_name=templ, context=ctx)
-
-
-# CBV equivalente a sopra
 class VacationListView(ListView):
     model = Vacation
     template_name = "vacation/vacationlist.html"
@@ -27,8 +18,8 @@ class VacationListView(ListView):
 class CreateVacationView(views.SuperuserRequiredMixin, CreateView):
     model = Vacation
     template_name = "vacation/create_vacation.html"
-    fields = "__all__"
-    success_url = reverse_lazy("vacation_list")
+    fields = '__all__'
+    success_url = reverse_lazy("vacation:vacationlist")
 
     def handle_no_permission(self, request):
         return redirect('not_authorized')

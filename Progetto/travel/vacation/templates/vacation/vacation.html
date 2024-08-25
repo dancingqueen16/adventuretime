@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %} {{object.title}} {% endblock %}
+{% block title %} {{object.titolo}} {% endblock %}
 
 {% block content %}
 
-<h2>{{ object.title }}</h2>
-  <p>{{ object.place }} {{ object.season }} {{ object.type }} {{ object.price }} {{ object.duration }}</p>
+<h2>{{ object.titolo }}</h2>
+  <p>{{ object.luogo }} {{ object.periodo }} {{ object.tipologia }} {{ object.prezzo }} {{ object.durata }}</p>
 
 {% if messages %}
     <div>

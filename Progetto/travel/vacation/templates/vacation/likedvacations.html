@@ -10,7 +10,7 @@
 
   {% if Liked %}
        {% for vacation in Liked %}
-         <a href="{% url 'vacation:detailvacation' vacation.pk %}"><b>  {{ vacation.title }} </b></a>
+         <a href="{% url 'vacation:detailvacation' vacation.pk %}"><b>  {{ vacation.titolo }} </b></a>
       {% endfor %}
   {% else %}
   <p>Non hai ancora aggiunto niente a questa lista</p>

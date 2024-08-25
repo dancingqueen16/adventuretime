@@ -11,7 +11,7 @@
   {% for l in List %}
     {% if l.vacations.count > 0 %}
        {% for vacation in l.vacations.all %}
-         <a href="{% url 'vacation:detailvacation' vacation.pk %}"><b>  {{ vacation.title }} </b></a>
+         <a href="{% url 'vacation:detailvacation' vacation.pk %}"><b>  {{ vacation.titolo }} </b></a>
       {% endfor %}
     {% else %}
        <p>Non sono presenti elementi in questa lista</p>

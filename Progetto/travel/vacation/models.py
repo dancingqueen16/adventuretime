@@ -4,46 +4,58 @@ from django.db import models
 
 class Vacation(models.Model):
     SEASON_CHOICES = [
-        ('INV', 'Inverno'),
-        ('PRI', 'Primavera'),
-        ('EST', 'Estate'),
-        ('AUT', 'Autunno'),
+        ('Inverno', 'Inverno'),
+        ('Primavera', 'Primavera'),
+        ('Estate', 'Estate'),
+        ('Autunno', 'Autunno'),
     ]
 
     TYPE_CHOICES = [
-        ('BEACH', 'Beach'),
-        ('MOUNTAIN', 'Mountain'),
-        ('CITY', 'City'),
-        ('CRUISE', 'Cruise'),
-        ('ADVENTURE', 'Adventure'),
+        ('Culturale', 'Culturale'),
+        ('Relax', 'Relax'),
+        ('Enogastronomico', 'Enogastronomico'),
+        ('On The Road', 'On The Road'),
+        ('Avventura', 'Avventura'),
     ]
 
     DURATION_CHOICES = [
-        ('<SETT', 'Meno di una settimana'),
-        ('12SETT', '1/2 Settimane'),
-        ('3SETT', '3 Settimane'),
-        ('>3SETT', 'Più di 3 settimane')
+        ('Weekend Lungo (2-4 Giorni)', 'Weekend Lungo (2-4 Giorni)'),
+        ('1 Settimana', '1 Settimana'),
+        ('2 Settimane', '2 Settimane'),
+        ('3 settimane o più', '3 settimane o più')
     ]
 
     PRICE_CHOICES = [
-        ('€', 'Economica'),
-        ('€€', 'Costosa'),
-        ('€€€', 'Lusso'),
+        ('Viaggio Low Cost', 'Viaggio Low Cost'),
+        ('Budget Medio', 'Budget Medio'),
+        ('Viaggio di Lusso', 'Viaggio di Lusso'),
     ]
 
-    title = models.CharField(max_length=200)
-    place = models.CharField(max_length=200)
-    duration = models.CharField(max_length=10,choices=DURATION_CHOICES)
-    price = models.CharField(max_length=3, choices=PRICE_CHOICES)
-    type = models.CharField(max_length=20,choices=TYPE_CHOICES)
-    likes = models.ManyToManyField(User, related_name='like')
-    season = models.CharField(max_length=10,choices=SEASON_CHOICES)
+    CONTINENT_CHOICES = [
+        ('Europa', 'Europa'),
+        ('America del Nord', 'America del Nord'),
+        ('America del Sud', 'America del Sud'),
+        ('Africa', 'Africa'),
+        ('Asia', 'Asia'),
+        ('Oceania', 'Oceania'),
+        ('Antartide', 'Antartide')
+    ]
+
+    titolo = models.CharField(max_length=200)
+    luogo = models.CharField(max_length=200)
+    continente = models.CharField(max_length=50, choices=CONTINENT_CHOICES)
+    durata = models.CharField(max_length=50, choices=DURATION_CHOICES)
+    prezzo = models.CharField(max_length=20, choices=PRICE_CHOICES)
+    tipologia = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    periodo = models.CharField(max_length=20, choices=SEASON_CHOICES)
+    descrizione = models.TextField()
+    like = models.ManyToManyField(User, blank=True, null=True, related_name='like')
 
     def like_count(self):
-        return self.likes.count()
+        return self.like.count()
 
     def __str__(self):
-        return self.title
+        return self.titolo
 
 
 class List(models.Model):
