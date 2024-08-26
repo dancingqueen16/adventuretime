@@ -1,6 +1,6 @@
 from collections import Counter
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
@@ -110,11 +110,11 @@ class VacationDetailView(FormView, DetailView):
 
         # Aggiungi la vacanza alla lista selezionata, se non è già presente
         if selected_list.vacations.filter(pk=vacation.pk).exists():
-            messages.warning(self.request, f'La vacanza "{vacation.title}" è già nella lista "{selected_list.name}".')
+            messages.warning(self.request, f'La vacanza "{vacation.titolo}" è già nella lista "{selected_list.name}".')
         else:
             selected_list.vacations.add(vacation)
             messages.success(self.request,
-                             f'La vacanza "{vacation.title}" è stata aggiunta alla lista "{selected_list.name}".')
+                             f'La vacanza "{vacation.titolo}" è stata aggiunta alla lista "{selected_list.name}".')
 
         return redirect('vacation:detailvacation', pk=vacation.pk)
 
@@ -156,7 +156,7 @@ class LikedVacations(views.LoginRequiredMixin, ListView):
         return redirect('not_authorized')
 
     def get_queryset(self):
-        return Vacation.objects.filter(likes=self.request.user)
+        return Vacation.objects.filter(like=self.request.user)
 
 
 @login_required(login_url=reverse_lazy('not_authorized'))
@@ -169,12 +169,12 @@ def like_vacation(request, pk):
 
     if fatte_list and fatte_list.vacations.filter(pk=vacation.pk).exists():
         # Controlla se l'utente ha già messo un like a questa vacanza
-        if request.user in vacation.likes.all():
-            vacation.likes.remove(request.user)
-            messages.info(request, f'Hai rimosso il like dalla vacanza "{vacation.title}".')
+        if request.user in vacation.like.all():
+            vacation.like.remove(request.user)
+            messages.info(request, f'Hai rimosso il like dalla vacanza "{vacation.titolo}".')
         else:
-            vacation.likes.add(request.user)
-            messages.success(request, f'Hai messo like alla vacanza "{vacation.title}".')
+            vacation.like.add(request.user)
+            messages.success(request, f'Hai messo like alla vacanza "{vacation.titolo}".')
     else:
         # Se la vacanza non è nella lista "Fatte", mostra un messaggio di avviso
         messages.warning(request, 'Devi prima aggiungere questa vacanza alla tua lista "Fatte" per poter mettere like.')
@@ -210,19 +210,22 @@ def search_vacation(request):
 
 def recommend_vacations(user):
     # Recupera le vacanze che l'utente ha piaciuto
-    liked_vacations = user.liked_vacations.all()
+    liked_vacations = Vacation.objects.filter(like=user)
 
     # Recupera tutte le vacanze nelle liste "da fare" dell'utente
-    to_do_vacations = Vacation.objects.filter(user=user).filter(name='Da Fare')
+    to_do_lists = List.objects.filter(user=user, name='Da Fare')
+    to_do_vacations = Vacation.objects.filter(in_list__in=to_do_lists)
 
-    # Combina le due liste di vacanze
-    all_vacations = liked_vacations | to_do_vacations
+    # Crea un insieme di ID di vacanze già conosciute (piaciute o da fare)
+    known_vacation_ids = liked_vacations.values_list('id', flat=True).union(
+        to_do_vacations.values_list('id', flat=True)
+    )
 
-    # Se non ci sono vacanze salvate o piaciute, non fare nulla
-    if not all_vacations.exists():
+    # Se non ci sono vacanze piaciute o "da fare", non fare nulla
+    if not known_vacation_ids:
         return Vacation.objects.none()
 
-    # Conta le occorrenze di ogni parametro tra le vacanze
+    # Conta le occorrenze di tutti i parametri tra le vacanze piaciute e "da fare"
     params = {
         'continente': [],
         'durata': [],
@@ -230,26 +233,29 @@ def recommend_vacations(user):
         'prezzo': []
     }
 
-    for vacation in all_vacations:
+    for vacation in Vacation.objects.filter(id__in=known_vacation_ids):
         params['continente'].append(vacation.continente)
         params['durata'].append(vacation.durata)
         params['tipologia'].append(vacation.tipologia)
         params['prezzo'].append(vacation.prezzo)
 
-    # Calcola il parametro più comune per ogni categoria
+    # Trova i parametri più comuni per ogni categoria
     most_common_params = {}
     for key, values in params.items():
         if values:
-            most_common_params[key] = Counter(values).most_common(1)[0][0]
+            counter = Counter(values)
+            max_count = counter.most_common(1)[0][1]
+            most_common_params[key] = [item for item, count in counter.items() if count == max_count]
 
-    # Filtra le vacanze in base ai parametri più comuni
-    filtered_vacations = Vacation.objects.all()
-    for key, value in most_common_params.items():
-        if value:
-            filter_kwargs = {key: value}
-            filtered_vacations = filtered_vacations.filter(**filter_kwargs)
+    # Costruisci una query per cercare vacanze che corrispondono a qualsiasi parametro comune
+    query = Q()
+    for key, common_values in most_common_params.items():
+        if common_values:
+            query |= Q(**{key + '__in': common_values})
+
+    filtered_vacations = Vacation.objects.filter(query).exclude(id__in=known_vacation_ids)
 
     # Ordina le vacanze in base al numero di "like"
-    recommended_vacations = filtered_vacations.annotate(num_likes=Count('like')).order_by('-num_likes')
+    recommended_vacations = filtered_vacations.annotate(num_likes=Count('like')).order_by('-num_likes')[:5]
 
     return recommended_vacations
