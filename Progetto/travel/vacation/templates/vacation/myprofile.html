@@ -1,19 +1,41 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profilo Utente</title>
+    <title>Il Mio Profilo</title>
 </head>
 <body>
-    <h4>Profilo di {{user.username}}</h4>
-    <a href="{% url 'loggingout' %}">Logout</a>
-    <a href="{% url 'homepage' %}">Torna alla Home</a>
-    <a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
+    <h1>Profilo di {{ user.username }}</h1>
 
-    <a href="{% url 'vacation:donevacations' %}">Vacanze Fatte</a>
-    <a href="{% url 'vacation:todovacations' %}">Vacanze Da Fare</a>
-    <a href="{% url 'vacation:likedvacations' %}">Vacanze Piaciute</a>
+    <!-- Sezione del profilo -->
+    <div>
+        <h2>Dettagli Profilo</h2>
+        <p>Nome: {{ user.get_full_name }}</p>
+        <p>Email: {{ user.email }}</p>
+        <!-- Aggiungi altre informazioni del profilo se necessario -->
+    </div>
 
+    <!-- Sezione delle vacanze raccomandate -->
+    <div>
+        <h2>Vacanze Raccomandate</h2>
+        <ul>
+            {% if vacations %}
+                {% for vacation in vacations %}
+                    <li>
+                        <strong>{{ vacation.titolo }}</strong><br>
+                        Luogo: {{ vacation.luogo }}<br>
+                        Continente: {{ vacation.continente }}<br>
+                        Durata: {{ vacation.durata }}<br>
+                        Tipologia: {{ vacation.tipologia }}<br>
+                        Prezzo: {{ vacation.prezzo }}<br>
+                        Numero di "Like": {{ vacation.num_likes }}
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li>Nessuna raccomandazione disponibile.</li>
+            {% endif %}
+        </ul>
+    </div>
 </body>
 </html>

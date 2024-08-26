@@ -1,3 +1,6 @@
+from collections import Counter
+
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
@@ -57,7 +60,15 @@ class DeleteVacationView(views.SuperuserRequiredMixin,DeleteView):
 @login_required(login_url=reverse_lazy('not_authorized'))
 def my_profile(request):
     user = get_object_or_404(User, pk=request.user.pk)
-    return render(request,"vacation/myprofile.html")
+
+    # Ottieni le raccomandazioni delle vacanze per l'utente
+    recommended_vacations = recommend_vacations(user)
+
+    # Passa sia i dati del profilo che le vacanze raccomandate al template
+    return render(request, 'vacation/myprofile.html', {
+        'user': user,
+        'vacations': recommended_vacations
+    })
 
 
 class VacationDetailView(FormView, DetailView):
@@ -195,3 +206,50 @@ def search_vacation(request):
             vacations = vacations.filter(prezzo=prezzo)
 
     return render(request, 'vacation/search_vacations.html', {'form': form, 'vacations': vacations})
+
+
+def recommend_vacations(user):
+    # Recupera le vacanze che l'utente ha piaciuto
+    liked_vacations = user.liked_vacations.all()
+
+    # Recupera tutte le vacanze nelle liste "da fare" dell'utente
+    to_do_vacations = Vacation.objects.filter(user=user).filter(name='Da Fare')
+
+    # Combina le due liste di vacanze
+    all_vacations = liked_vacations | to_do_vacations
+
+    # Se non ci sono vacanze salvate o piaciute, non fare nulla
+    if not all_vacations.exists():
+        return Vacation.objects.none()
+
+    # Conta le occorrenze di ogni parametro tra le vacanze
+    params = {
+        'continente': [],
+        'durata': [],
+        'tipologia': [],
+        'prezzo': []
+    }
+
+    for vacation in all_vacations:
+        params['continente'].append(vacation.continente)
+        params['durata'].append(vacation.durata)
+        params['tipologia'].append(vacation.tipologia)
+        params['prezzo'].append(vacation.prezzo)
+
+    # Calcola il parametro più comune per ogni categoria
+    most_common_params = {}
+    for key, values in params.items():
+        if values:
+            most_common_params[key] = Counter(values).most_common(1)[0][0]
+
+    # Filtra le vacanze in base ai parametri più comuni
+    filtered_vacations = Vacation.objects.all()
+    for key, value in most_common_params.items():
+        if value:
+            filter_kwargs = {key: value}
+            filtered_vacations = filtered_vacations.filter(**filter_kwargs)
+
+    # Ordina le vacanze in base al numero di "like"
+    recommended_vacations = filtered_vacations.annotate(num_likes=Count('like')).order_by('-num_likes')
+
+    return recommended_vacations
