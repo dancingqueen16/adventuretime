@@ -23,6 +23,8 @@
    <button type="button" disabled>Crea Nuova Vacanza</button>
 {% endif %}
 
+<a href="{% url 'vacation:search_vacations' %}">Cerca Vacanze</a>
+
 <a href="{% url 'vacation:myprofile' %}">Profilo</a>
 <a href="{% url 'register' %}">Registrati</a>
 

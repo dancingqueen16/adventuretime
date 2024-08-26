@@ -1,5 +1,5 @@
 from django import forms
-from .models import List
+from .models import List, Vacation
 
 
 class AddToListForm(forms.Form):
@@ -25,3 +25,11 @@ class AddToListForm(forms.Form):
             user=self.user
         )
         return list
+
+
+class VacationSearchForm(forms.Form):
+    # Aggiungiamo un'opzione vuota all'inizio delle scelte
+    continente = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.CONTINENT_CHOICES, required=False)
+    durata = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.DURATION_CHOICES, required=False)
+    tipologia = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.TYPE_CHOICES, required=False)
+    prezzo = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.PRICE_CHOICES, required=False)

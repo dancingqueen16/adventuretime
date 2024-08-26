@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from .models import Vacation, List
-from .forms import AddToListForm
+from .forms import AddToListForm, VacationSearchForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
 from braces import views
 from django.contrib.auth.models import User
@@ -169,3 +169,29 @@ def like_vacation(request, pk):
         messages.warning(request, 'Devi prima aggiungere questa vacanza alla tua lista "Fatte" per poter mettere like.')
 
     return redirect(reverse("vacation:detailvacation", kwargs={"pk": pk}))
+
+
+def search_vacation(request):
+    form = VacationSearchForm(request.GET or None)
+    vacations = None
+
+    if request.GET and form.is_valid():  # Verifica se ci sono parametri GET e se il form è valido
+        vacations = Vacation.objects.all()
+
+        continente = form.cleaned_data.get('continente')
+        if continente:  # Filtra solo se è stato selezionato un valore diverso da "Tutti"
+            vacations = vacations.filter(continente=continente)
+
+        durata = form.cleaned_data.get('durata')
+        if durata:
+            vacations = vacations.filter(durata=durata)
+
+        tipologia = form.cleaned_data.get('tipologia')
+        if tipologia:
+            vacations = vacations.filter(tipologia=tipologia)
+
+        prezzo = form.cleaned_data.get('prezzo')
+        if prezzo:
+            vacations = vacations.filter(prezzo=prezzo)
+
+    return render(request, 'vacation/search_vacations.html', {'form': form, 'vacations': vacations})

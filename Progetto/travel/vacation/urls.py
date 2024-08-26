@@ -13,6 +13,7 @@ urlpatterns = [
      path("myprofile", my_profile, name="myprofile"),
      path("donevacations", DoneVacations.as_view(), name="donevacations"),
      path("todovacations", ToDoVacations.as_view(), name="todovacations"),
-     path("likedvacations", LikedVacations.as_view(), name="likedvacations")
+     path("likedvacations", LikedVacations.as_view(), name="likedvacations"),
+     path('search/', search_vacation, name='search_vacations')
    ]
 
