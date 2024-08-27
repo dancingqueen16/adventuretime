@@ -4,8 +4,8 @@ from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
-from .models import Vacation, List
-from .forms import AddToListForm, VacationSearchForm
+from .models import Vacation, List, UserProfile
+from .forms import AddToListForm, VacationSearchForm, UserProfileForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
 from braces import views
 from django.contrib.auth.models import User
@@ -59,7 +59,21 @@ class DeleteVacationView(views.SuperuserRequiredMixin,DeleteView):
 
 @login_required(login_url=reverse_lazy('not_authorized'))
 def my_profile(request):
+    # Controlla se l'utente ha già un profilo
+    if not hasattr(request.user, 'userprofile'):
+        # Crea il profilo se non esiste
+        UserProfile.objects.create(user=request.user)
+
+
     user = get_object_or_404(User, pk=request.user.pk)
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+        if form.is_valid():
+            form.save()
+            return redirect('vacation:myprofile')
+    else:
+        form = UserProfileForm(instance=request.user.userprofile)
 
     # Ottieni le raccomandazioni delle vacanze per l'utente
     recommended_vacations, most_common_param = recommend_vacations(user)

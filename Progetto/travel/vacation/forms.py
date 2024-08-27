@@ -1,5 +1,5 @@
 from django import forms
-from .models import List, Vacation
+from .models import List, Vacation, UserProfile
 
 
 class AddToListForm(forms.Form):
@@ -33,3 +33,9 @@ class VacationSearchForm(forms.Form):
     durata = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.DURATION_CHOICES, required=False)
     tipologia = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.TYPE_CHOICES, required=False)
     prezzo = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.PRICE_CHOICES, required=False)
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['profile_image']
