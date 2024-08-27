@@ -8,7 +8,7 @@
 
     <h2>Ciao {{user.username}}!</h2>
     <h4>Vacanze Consigliate</h4>
-    <p>In base alle tue vacanze "da fare" e ai tuoi like ti potrebbero piacere:</p>
+    <p>Le seguenti vacanze sono raccomandate perché condividono il valore comune: <strong>{{ param }}</strong>.</p>
 
     {% if vacations.count > 0 %}
 

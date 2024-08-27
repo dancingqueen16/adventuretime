@@ -62,12 +62,13 @@ def my_profile(request):
     user = get_object_or_404(User, pk=request.user.pk)
 
     # Ottieni le raccomandazioni delle vacanze per l'utente
-    recommended_vacations = recommend_vacations(user)
+    recommended_vacations, most_common_param = recommend_vacations(user)
 
     # Passa sia i dati del profilo che le vacanze raccomandate al template
     return render(request, 'vacation/myprofile.html', {
         'user': user,
-        'vacations': recommended_vacations
+        'vacations': recommended_vacations,
+        'param': most_common_param
     })
 
 
@@ -223,39 +224,36 @@ def recommend_vacations(user):
 
     # Se non ci sono vacanze piaciute o "da fare", non fare nulla
     if not known_vacation_ids:
-        return Vacation.objects.none()
+        return Vacation.objects.none(), None
 
     # Conta le occorrenze di tutti i parametri tra le vacanze piaciute e "da fare"
-    params = {
-        'continente': [],
-        'durata': [],
-        'tipologia': [],
-        'prezzo': []
-    }
-
+    params = []
     for vacation in Vacation.objects.filter(id__in=known_vacation_ids):
-        params['continente'].append(vacation.continente)
-        params['durata'].append(vacation.durata)
-        params['tipologia'].append(vacation.tipologia)
-        params['prezzo'].append(vacation.prezzo)
+        params.extend([
+            vacation.continente,
+            vacation.durata,
+            vacation.tipologia,
+            vacation.prezzo
+        ])
 
-    # Trova i parametri più comuni per ogni categoria
-    most_common_params = {}
-    for key, values in params.items():
-        if values:
-            counter = Counter(values)
-            max_count = counter.most_common(1)[0][1]
-            most_common_params[key] = [item for item, count in counter.items() if count == max_count]
+    # Trova il parametro più comune tra tutte le categorie
+    if params:
+        most_common_param, most_common_count = Counter(params).most_common(1)[0]
+    else:
+        return Vacation.objects.none(), None
 
-    # Costruisci una query per cercare vacanze che corrispondono a qualsiasi parametro comune
-    query = Q()
-    for key, common_values in most_common_params.items():
-        if common_values:
-            query |= Q(**{key + '__in': common_values})
+    # Costruisci una query per cercare vacanze che corrispondono al parametro più comune
+    query = (
+        Q(continente=most_common_param) |
+        Q(durata=most_common_param) |
+        Q(tipologia=most_common_param) |
+        Q(prezzo=most_common_param)
+    )
 
+    # Filtra le vacanze che non sono già state conosciute dall'utente
     filtered_vacations = Vacation.objects.filter(query).exclude(id__in=known_vacation_ids)
 
-    # Ordina le vacanze in base al numero di "like"
+    # Ordina le vacanze in base al numero di "like" e limita i risultati a 5
     recommended_vacations = filtered_vacations.annotate(num_likes=Count('like')).order_by('-num_likes')[:5]
 
-    return recommended_vacations
+    return recommended_vacations, most_common_param
