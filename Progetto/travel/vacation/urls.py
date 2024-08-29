@@ -16,6 +16,7 @@ urlpatterns = [
      path("donevacations", DoneVacations.as_view(), name="donevacations"),
      path("todovacations", ToDoVacations.as_view(), name="todovacations"),
      path("likedvacations", LikedVacations.as_view(), name="likedvacations"),
-     path('search/', search_vacation, name='search_vacations')
+     path('search/', search_vacation, name='search_vacations'),
+     path('change_picture/', change_pic, name='change_picture')
    ]
 

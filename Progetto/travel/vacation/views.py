@@ -64,16 +64,7 @@ def my_profile(request):
         # Crea il profilo se non esiste
         UserProfile.objects.create(user=request.user)
 
-
     user = get_object_or_404(User, pk=request.user.pk)
-
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
-        if form.is_valid():
-            form.save()
-            return redirect('vacation:myprofile')
-    else:
-        form = UserProfileForm(instance=request.user.userprofile)
 
     # Ottieni le raccomandazioni delle vacanze per l'utente
     recommended_vacations, most_common_param = recommend_vacations(user)
@@ -82,8 +73,21 @@ def my_profile(request):
     return render(request, 'vacation/myprofile.html', {
         'user': user,
         'vacations': recommended_vacations,
-        'param': most_common_param
+        'param': most_common_param,
     })
+
+
+@login_required(login_url=reverse_lazy('not_authorized'))
+def change_pic(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+        if form.is_valid():
+            form.save()
+            return redirect('vacation:change_picture')  # Dopo aver cambiato la foto, redirigi l'utente al profilo
+    else:
+        form = UserProfileForm(instance=request.user.userprofile)
+
+    return render(request, 'vacation/change_picture.html', {'form': form})
 
 
 class VacationDetailView(FormView, DetailView):

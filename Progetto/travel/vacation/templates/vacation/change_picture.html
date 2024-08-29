@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% load static %}
+
+{% block head %} {% endblock %}
+
+{% block title %} Profilo {% endblock %}
+
+{% block content %}
+
+   <h2>Cambia la tua immagine di profilo</h2>
+    <img src="{% if user.userprofile.profile_image %}{{ user.userprofile.profile_image.url }}{% else %} {% static 'profile_images/default.jpg' %} {% endif %}" alt="Immagine di profilo">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Aggiorna Immagine</button>
+    </form>
+
+<a href="{% url 'homepage' %}">Home</a>
+
+{% endblock %}

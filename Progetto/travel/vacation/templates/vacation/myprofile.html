@@ -8,17 +8,12 @@
 
     <h2>Ciao {{user.username}}!</h2>
 
-    <img src="{% if user.userprofile.profile_image %}{{ user.userprofile.profile_image.url }}{% else %} {% static '/img/default.jpg' %} {% endif %}" alt="Immagine di profilo">
-    <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Aggiorna</button>
-</form>
+    <img src="{% if user.userprofile.profile_image %}{{ user.userprofile.profile_image.url }}{% else %} {% static 'profile_images/default.jpg' %} {% endif %}" alt="Immagine di profilo">
+    <a href="{% url 'vacation:change_picture' %}">Cambia immagine</a>
     <h4>Vacanze Consigliate</h4>
-    <p>Le seguenti vacanze sono raccomandate perché condividono il valore comune: <strong>{{ param }}</strong>.</p>
 
     {% if vacations.count > 0 %}
-
+       <p>Le seguenti vacanze sono raccomandate perché condividono il valore comune: <strong>{{ param }}</strong>.</p>
         {% for v in vacations %}
 
             <div class="card">
