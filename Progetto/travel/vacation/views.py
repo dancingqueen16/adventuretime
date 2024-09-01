@@ -46,7 +46,7 @@ class UpdateVacationView(views.SuperuserRequiredMixin,UpdateView):
         return reverse("vacation:vacation", kwargs={'pk': pk})
 
 
-class DeleteVacationView(views.SuperuserRequiredMixin,DeleteView):
+class DeleteVacationView(views.SuperuserRequiredMixin, DeleteView):
     model = Vacation
     template_name = "vacation/delete_vacation.html"
 

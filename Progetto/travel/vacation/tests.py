@@ -6,7 +6,7 @@ from .models import Vacation, List
 from .views import recommend_vacations
 
 
-'''class RecommendVacationsTestCase(TestCase):
+class RecommendVacationsTestCase(TestCase):
 
     def setUp(self):
         # Creazione di un utente di esempio
@@ -101,7 +101,7 @@ from .views import recommend_vacations
 
         # Verifica che nessuna vacanza venga raccomandata
         self.assertFalse(recommended_vacations)
-        self.assertIsNone(most_common_param)'''
+        self.assertIsNone(most_common_param)
 
 # Test sulla vista di ricerca viaggi
 from django.test import TestCase

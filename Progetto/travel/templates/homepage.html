@@ -8,11 +8,14 @@
 <h2>Homepage Sito</h2>
 
 <p>Comincia la navigazione</p>
-<button type="button">
-  <a href="{% url 'login'%}">Login</a>
-</button>
 
-<a href="{% url 'loggingout' %}">Logout</a>
+
+{% if user.is_authenticated %}
+      <form id="logout-form" method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-info">Log out</button>
+      </form>
+{% endif %}
 
 <a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
 
