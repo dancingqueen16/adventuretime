@@ -62,8 +62,9 @@
 <header>
     <h1>Il Mio Sito</h1>
     <nav>
-        <a href="vacanze.html">Lista Vacanze</a>
-        <a href="profilo.html">Profilo</a>
+        <a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
+        <a href="{% url 'vacation:search_vacations' %}">Cerca Vacanze</a>
+        <a href="{% url 'vacation:myprofile' %}">Profilo</a>
     </nav>
 </header>
 
@@ -76,7 +77,12 @@
 <footer>
     <div class="footer-links">
          <a href="{% url 'login'%}">Login</a>
-        <a href="logout.html">Logout</a>
+         {% if user.is_authenticated %}
+      <form id="logout-form" method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-info">Log out</button>
+      </form>
+{% endif %}
         <a href="{% url 'register' %}">Registrati</a>
     </div>
 </footer>

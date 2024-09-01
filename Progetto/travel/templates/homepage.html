@@ -9,16 +9,6 @@
 
 <p>Comincia la navigazione</p>
 
-
-{% if user.is_authenticated %}
-      <form id="logout-form" method="post" action="{% url 'logout' %}">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-info">Log out</button>
-      </form>
-{% endif %}
-
-<a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
-
 {% if user.is_authenticated and user.is_superuser %}
    <button type="button">
     <a href="{% url 'vacation:createvacation' %}">Crea Nuova Vacanza</a>
@@ -27,10 +17,7 @@
    <button type="button" disabled>Crea Nuova Vacanza</button>
 {% endif %}
 
-<a href="{% url 'vacation:search_vacations' %}">Cerca Vacanze</a>
 
-<a href="{% url 'vacation:myprofile' %}">Profilo</a>
-<a href="{% url 'register' %}">Registrati</a>
 
 
 {% endblock %}
