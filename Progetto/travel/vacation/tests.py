@@ -34,22 +34,22 @@ class RecommendVacationsTestCase(TestCase):
 
         # Creazione di vacanze di esempio NON conosciute dall'utente
         self.vacation3 = Vacation.objects.create(
-            titolo="Relax in Sud America",
-            luogo="Brasile",
-            continente="Sud America",
-            durata="1 Settimana",
-            prezzo="Viaggio Low Cost",
-            tipologia="Relax",
-            periodo="Inverno"
+            titolo='Relax sulla Costa del Brasile',
+            luogo='Rio de Janeiro, Brasile',
+            continente='America del Sud',
+            durata='1 Settimana',
+            prezzo='Viaggio di Lusso',
+            tipologia='Relax',
+            periodo='Estate'
         )
         self.vacation4 = Vacation.objects.create(
-            titolo="Safari in Africa",
-            luogo="Kenya",
-            continente="Africa",
-            durata="3 Settimane",
-            prezzo="Budget Alto",
-            tipologia="Avventura",
-            periodo="Autunno"
+            titolo='Tour Enogastronomico in Nuova Zelanda',
+            luogo='Auckland e Regione di Marlborough, Nuova Zelanda',
+            continente='Oceania',
+            durata='1 Settimana',
+            prezzo='Viaggio di Lusso',
+            tipologia='Enogastronomico',
+            periodo='Autunno'
         )
 
         # Creazione di vacanze che corrispondono al parametro più comune
@@ -85,6 +85,10 @@ class RecommendVacationsTestCase(TestCase):
         # Verifica che le vacanze gia' conosciute non siano consigliate
         self.assertNotIn(self.vacation1, recommended_vacations)
         self.assertNotIn(self.vacation2, recommended_vacations)
+
+        # Verifica che le vacanze che non corrispondo ai parametri non siano consigliate
+        self.assertNotIn(self.vacation3, recommended_vacations)
+        self.assertNotIn(self.vacation4, recommended_vacations)
 
         # Verifica che le vacanze non conosciute con parametro piu' comune siano consigliate
         self.assertIn(self.vacation5, recommended_vacations)

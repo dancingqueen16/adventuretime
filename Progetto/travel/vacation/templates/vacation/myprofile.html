@@ -27,11 +27,9 @@
         <p>Non ci sono proposte!</p>
     {% endif %}
 
-<a href="{% url 'homepage' %}">Home</a>
 <a href="{% url 'vacation:likedvacations' %}">Vacanze Piaciute</a>
 <a href="{% url 'vacation:donevacations' %}">Vacanze Fatte</a>
 <a href="{% url 'vacation:todovacations' %}">Vacanze da Fare</a>
-<a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
 
 {% endblock %}
 

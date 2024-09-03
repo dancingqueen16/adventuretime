@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> {% block head %} {% endblock %} </title>
+    <title> {% block head %} Passepartout {% endblock %} </title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -43,6 +43,27 @@
             color: white;
         }
 
+        .logout-btn {
+            font-size: 15px;
+            text-decoration: none;
+            color: #34495e; /* Colore testo scuro */
+            background-color: #d3e0ea; /* Grigio azzurro pastello */
+            padding: 12px 15px; /* Dimensioni del pulsante */
+            border: none; /* Rimuove il bordo */
+            border-radius: 20px; /* Angoli arrotondati */
+            cursor: pointer; /* Cambia il cursore al passaggio del mouse */
+            transition: background-color 0.3s, color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #34495e;
+    color: white;
+}
+
+.logout-btn:focus {
+    outline: none; /* Rimuove il contorno di focus predefinito */
+}
+
         main {
             flex: 1;
             padding: 20px;
@@ -56,14 +77,19 @@
             margin-top: 10px;
         }
     </style>
+
 </head>
 <body>
 
 <header>
-    <h1>Il Mio Sito</h1>
+    <h1>Passepartout</h1>
     <nav>
+        <a href="{% url 'homepage' %}">Home</a>
         <a href="{% url 'vacation:vacationlist' %}">Lista vacanze</a>
         <a href="{% url 'vacation:search_vacations' %}">Cerca Vacanze</a>
+        {% if user.is_authenticated and user.is_superuser %}
+           <a href="{% url 'vacation:createvacation' %}">Crea Vacanza</a>
+        {% endif %}
         <a href="{% url 'vacation:myprofile' %}">Profilo</a>
     </nav>
 </header>
@@ -80,10 +106,11 @@
          {% if user.is_authenticated %}
       <form id="logout-form" method="post" action="{% url 'logout' %}">
       {% csrf_token %}
-      <button type="submit" class="btn btn-info">Log out</button>
+      <button type="submit" class="logout-btn">Logout</button>
       </form>
-{% endif %}
+      {% endif %}
         <a href="{% url 'register' %}">Registrati</a>
+        <a href="{% url 'admin:index' %}">Amministrazione</a>
     </div>
 </footer>
 

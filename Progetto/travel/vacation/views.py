@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from .models import Vacation, List, UserProfile
-from .forms import AddToListForm, VacationSearchForm, UserProfileForm
+from .forms import AddToListForm, VacationSearchForm, RemoveFromListForm, UserProfileForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
 from braces import views
 from django.contrib.auth.models import User
@@ -43,7 +43,7 @@ class UpdateVacationView(views.SuperuserRequiredMixin,UpdateView):
 
     def get_success_url(self):
         pk = self.get_context_data()["object"].pk
-        return reverse("vacation:vacation", kwargs={'pk': pk})
+        return reverse("vacation:detailvacation", kwargs={'pk': pk})
 
 
 class DeleteVacationView(views.SuperuserRequiredMixin, DeleteView):
@@ -94,40 +94,46 @@ class VacationDetailView(FormView, DetailView):
     model = Vacation
     template_name = 'vacation/vacation.html'
     form_class = AddToListForm
+    second_form_class = RemoveFromListForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
 
+    def get_second_form_kwargs(self):
+        kwargs = {'user': self.request.user, 'vacation': self.get_object()}
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        context['add_form'] = self.get_form()
+        context['remove_form'] = RemoveFromListForm(**self.get_second_form_kwargs())
+        return context
+
     def form_valid(self, form):
         vacation = self.get_object()
         selected_list = form.get_or_create_list()
 
-        # Riferimenti ai nomi delle liste
         fatti_list_name = 'Fatte'
         da_fare_list_name = 'Da Fare'
 
-        # Ottenere le altre liste dell'utente
         fatti_list = List.objects.filter(user=self.request.user, name=fatti_list_name).first()
         da_fare_list = List.objects.filter(user=self.request.user, name=da_fare_list_name).first()
 
-        # Controlla se la vacanza è nella lista opposta
         if selected_list.name == fatti_list_name:
-            # Se si aggiunge a "Fatte" e la vacanza è in "Da Fare", rimuoverla da "Da Fare"
             if da_fare_list and da_fare_list.vacations.filter(pk=vacation.pk).exists():
                 da_fare_list.vacations.remove(vacation)
                 messages.info(self.request,
-                              f'La vacanza "{vacation.title}" è stata rimossa dalla lista "{da_fare_list_name}".')
+                              f'La vacanza "{vacation.titolo}" è stata rimossa dalla lista "{da_fare_list_name}".')
 
         elif selected_list.name == da_fare_list_name:
-            # Se si aggiunge a "Da Fare" e la vacanza è in "Fatte", non permettere l'aggiunta
             if fatti_list and fatti_list.vacations.filter(pk=vacation.pk).exists():
                 messages.warning(self.request,
-                                 f'La vacanza "{vacation.title}" è già nella lista "{fatti_list_name}" e non può essere aggiunta a "{da_fare_list_name}".')
+                                 f'La vacanza "{vacation.titolo}" è già nella lista "{fatti_list_name}" e non può essere aggiunta a "{da_fare_list_name}".')
                 return redirect('vacation:detailvacation', pk=vacation.pk)
 
-        # Aggiungi la vacanza alla lista selezionata, se non è già presente
         if selected_list.vacations.filter(pk=vacation.pk).exists():
             messages.warning(self.request, f'La vacanza "{vacation.titolo}" è già nella lista "{selected_list.name}".')
         else:
@@ -136,6 +142,36 @@ class VacationDetailView(FormView, DetailView):
                              f'La vacanza "{vacation.titolo}" è stata aggiunta alla lista "{selected_list.name}".')
 
         return redirect('vacation:detailvacation', pk=vacation.pk)
+
+    def post(self, request, *args, **kwargs):
+        if 'add_to_list' in request.POST:
+            form = self.get_form()
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return self.form_invalid(form)
+
+        elif 'remove_from_list' in request.POST:
+            remove_form = RemoveFromListForm(data=request.POST, **self.get_second_form_kwargs())
+            if remove_form.is_valid():
+                vacation = self.get_object()
+                list_id = remove_form.cleaned_data['list']
+                selected_list = List.objects.get(id=list_id, user=request.user)
+
+                selected_list.vacations.remove(vacation)
+
+                # Verifica se la lista è "Fatte" e rimuovi il like se necessario
+                if selected_list.name == 'Fatte' and vacation.like.filter(id=request.user.id).exists():
+                    vacation.like.remove(request.user)
+                    messages.info(request, 'Il like è stato rimosso poiché hai tolto la vacanza dalla lista "Fatte".')
+
+                messages.success(self.request, 'La vacanza è stata rimossa dalla lista con successo!')
+                return redirect('vacation:detailvacation', pk=self.get_object().pk)
+            else:
+                messages.error(self.request, 'C\'è stato un problema con il tuo invio. Per favore, riprova.')
+                return self.form_invalid(remove_form)
+
+        return super().post(request, *args, **kwargs)
 
     def form_invalid(self, form):
         messages.error(self.request, 'C\'è stato un problema con il tuo invio. Per favore, riprova.')

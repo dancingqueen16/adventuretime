@@ -49,7 +49,7 @@ class Vacation(models.Model):
     tipologia = models.CharField(max_length=50, choices=TYPE_CHOICES)
     periodo = models.CharField(max_length=20, choices=SEASON_CHOICES)
     descrizione = models.TextField()
-    like = models.ManyToManyField(User, blank=True, null=True, related_name='like')
+    like = models.ManyToManyField(User, blank=True, related_name='like')
 
     def like_count(self):
         return self.like.count()

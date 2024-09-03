@@ -27,6 +27,27 @@ class AddToListForm(forms.Form):
         return list
 
 
+class RemoveFromListForm(forms.Form):
+    list = forms.ChoiceField(
+        label="Seleziona Lista",
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
+    def __init__(self, user, vacation, *args, **kwargs):
+        super(RemoveFromListForm, self).__init__(*args, **kwargs)
+        self.user = user
+        self.vacation = vacation
+        # Filtra le liste dell'utente che contengono la vacanza corrente
+        if user.is_authenticated:
+            lists_with_vacation = user.list.filter(vacations=self.vacation)
+            self.fields['list'].choices = [(lst.id, lst.name) for lst in lists_with_vacation]
+
+    def remove_vacation(self):
+        list_id = self.cleaned_data['list']
+        selected_list = List.objects.get(id=list_id, user=self.user)
+        selected_list.vacations.remove(self.vacation)
+
+
 class VacationSearchForm(forms.Form):
     # Aggiungiamo un'opzione vuota all'inizio delle scelte
     continente = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.CONTINENT_CHOICES, required=False)

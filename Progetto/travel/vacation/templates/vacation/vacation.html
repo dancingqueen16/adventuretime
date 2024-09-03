@@ -7,6 +7,19 @@
 <h2>{{ object.titolo }}</h2>
   <p>{{ object.luogo }} {{ object.periodo }} {{ object.tipologia }} {{ object.prezzo }} {{ object.durata }}</p>
 
+{% if user.is_authenticated %}
+    <form method="POST" action="{% url 'vacation:like' object.pk %}">
+        {% csrf_token %}
+        {% if user in object.like.all %}
+            <button type="submit" class="btn btn-danger">{{ object.like_count }} ❤️ like</button>
+        {% else %}
+            <button type="submit" class="btn btn-primary">{{ object.like_count }} 🤍 like</button>
+        {% endif %}
+    </form>
+{% else %}
+    <button type="button" class="btn btn-danger" disabled>{{ object.like_count }} ❤️ like</button>
+{% endif %}
+
 {% if messages %}
     <div>
       {% for message in messages %}
@@ -15,24 +28,11 @@
         </div>
       {% endfor %}
     </div>
-  {% endif %}
-
-  {% if user.is_authenticated %}
-        <form method="POST" action="{% url 'vacation:like' object.pk %}">
-          {% csrf_token %}
-          {% if user in object.likes.all %}
-            <button type="submit" class="btn btn-danger">{{ object.like_count }} ❤️ like</button>
-          {% else %}
-            <button type="submit" class="btn btn-primary">{{ object.like_count }} 🩶 like</button>
-          {% endif %}
-        </form>
-      {% else %}
-        <button type="button" class="btn btn-danger" disabled>{{ object.like_count }} ❤️ like</button>
-      {% endif %}
+{% endif %}
 
 
 
-  <h3>Aggiungi a una Lista</h3>
+  <h4>Aggiungi a una Lista</h4>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
@@ -43,14 +43,20 @@
     {% endif %}
   </form>
 
+<h4>Rimuovi da una lista</h4>
+<form method="post">
+    {% csrf_token %}
+    {{ remove_form.as_p }}
+    {% if user.is_authenticated %}
+        <button type="submit" name="remove_from_list" class="btn btn-danger">Rimuovi</button>
+    {% else %}
+        <button type="button" class="btn btn-danger" disabled>Rimuovi</button>
+    {% endif %}
+</form>
 
-
-<a href="{% url 'vacation:editvacation' object.pk %}">Modifica Vacanza</a>
-<a href="{% url 'vacation:deletevacation' object.pk %}">Elimina Vacanza</a>
-
-<a href="{% url 'homepage' %}">Torna alla Home</a>
-<a href="{% url 'vacation:vacationlist' %}">Lista Vacanze</a>
-
-<a href="{% url 'vacation:myprofile' %}">Profilo</a>
+{% if user.is_authenticated and user.is_superuser %}
+    <a href="{% url 'vacation:editvacation' object.pk %}">Modifica Vacanza</a>
+    <a href="{% url 'vacation:deletevacation' object.pk %}">Elimina Vacanza</a>
+{% endif %}
 
 {% endblock %}
