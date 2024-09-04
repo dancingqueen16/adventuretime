@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block head %} Modifica Vacanze {% endblock %}
+{% block head %} {{object.titolo}} {% endblock %}
 
 {% block title %} {{object.titolo}} {% endblock %} 
 
@@ -54,6 +54,13 @@
     .edit-container a:hover {
         text-decoration: underline;
     }
+
+    .alert {
+        margin-top: 10px;
+        text-align: center;
+        font-weight: bold;
+        font-size: large;
+    }
 </style>
 
 <div class="edit-container">
@@ -67,4 +74,14 @@
     <a href="{% url 'vacation:detailvacation' object.pk %}">Indietro</a>
 </div>
 
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 {% endblock %}

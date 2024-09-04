@@ -54,9 +54,22 @@
         background-color: #d3e0ea; /* Leggero cambio di colore al passaggio del mouse */
     }
 
+    .btn-disabled {
+        border-radius: 20px;
+        padding: 8px 15px;
+        font-size: 1em;
+        border: none;
+        cursor: pointer;
+        background-color: #eaf1f6;
+        color: #555;
+        opacity: 0.8
+    }
+
     .alert {
         margin-top: 10px;
         text-align: center;
+        font-weight: bold;
+        font-size: large;
     }
 
     .admin-actions {
@@ -79,13 +92,24 @@
     }
 </style>
 
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+
 <h2>{{ object.titolo }}</h2>
 <div class="vacation-info">
     <p>Luogo: <strong>{{ object.luogo }}</strong></p>
-    <p>Periodo: <strong>{{ object.periodo }}</strong></p>
     <p>Tipologia: <strong>{{ object.tipologia }}</strong></p>
     <p>Prezzo: <strong>{{ object.prezzo }}</strong></p>
     <p>Durata: <strong>{{ object.durata }}</strong></p>
+    <p>Periodo: <strong>{{ object.periodo }}</strong></p>
     <p>{{ object.descrizione }}</p>
 </div>
 
@@ -100,7 +124,7 @@
             {% endif %}
         </form>
     {% else %}
-        <button type="button" class="btn" disabled>{{ object.like_count }} ❤️ like</button>
+        <button type="button" class="btn-disabled">{{ object.like_count }} ❤️ like</button>
     {% endif %}
 </div>
 
@@ -113,7 +137,7 @@
             {% if user.is_authenticated %}
                 <button type="submit" class="btn">Aggiungi</button>
             {% else %}
-                <button type="button" class="btn" disabled>Aggiungi</button>
+                <button type="button" class="btn-disabled">Aggiungi</button>
             {% endif %}
         </form>
     </div>
@@ -126,21 +150,12 @@
             {% if user.is_authenticated %}
                 <button type="submit" name="remove_from_list" class="btn">Rimuovi</button>
             {% else %}
-                <button type="button" class="btn" disabled>Rimuovi</button>
+                <button type="button" class="btn-disabled">Rimuovi</button>
             {% endif %}
         </form>
     </div>
 </div>
 
-{% if messages %}
-    <div>
-        {% for message in messages %}
-            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
 
 {% if user.is_authenticated and user.is_superuser %}
     <div class="admin-actions">

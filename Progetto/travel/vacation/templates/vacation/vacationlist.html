@@ -5,16 +5,24 @@
 {% block title %}  {% endblock %}
 
 {% block content %}
-
 <style>
+    .alert {
+        margin-top: 10px;
+        text-align: center;
+        font-weight: bold;
+        font-size: large;
+    }
+
     .vacation-container {
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
+        justify-content: center; /* Centra le card orizzontalmente */
     }
 
     .card {
-        flex: 1 1 calc(33.333% - 20px); /* Adatta le card per stare in una fila di tre */
+        flex: 1 1 300px; /* Mantiene la larghezza fissa a 300px */
+        max-width: 300px;
         box-sizing: border-box;
         padding: 20px;
         border: 1px solid #ccc;
@@ -30,7 +38,7 @@
     }
 
     .card a:hover {
-        opacity: 0.8 /* Aggiungi un'animazione di hover per migliorare l'usabilità */
+        opacity: 0.8; /* Aggiungi un'animazione di hover per migliorare l'usabilità */
     }
 
     .card p {
@@ -40,16 +48,29 @@
 
     @media (max-width: 768px) {
         .card {
-            flex: 1 1 calc(50% - 20px); /* Adatta a due per fila su schermi più piccoli */
+            flex: 1 1 48%; /* Mantiene la larghezza fissa a 48% su schermi più piccoli */
+            max-width: 48%;
         }
     }
 
     @media (max-width: 480px) {
         .card {
-            flex: 1 1 100%; /* Adatta a una per fila su schermi molto piccoli */
+            flex: 1 1 100%; /* Mantiene la larghezza fissa a 100% su schermi molto piccoli */
+            max-width: 100%;
         }
     }
 </style>
+
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 
     <h1>Lista Vacanze</h1>
 
@@ -58,7 +79,7 @@
             {% for v in object_list %}
                 <div class="card">
                     <a href="{% url 'vacation:detailvacation' v.pk %}">{{v.titolo}}</a>
-                    <p> <strong>{{ v.luogo }}</strong></p>
+                    <p><strong>{{ v.luogo }}</strong></p>
                     <p>{{v.descrizione}}</p>
                 </div>
             {% endfor %}

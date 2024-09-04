@@ -7,6 +7,13 @@
 {% block content %}
 
 <style>
+    .alert {
+        margin-top: 10px;
+        text-align: center;
+        font-weight: bold;
+        font-size: large;
+    }
+
     .profile-container {
         display: flex;
         flex-direction: column;
@@ -92,6 +99,17 @@
     }
 </style>
 
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+
 <div class="profile-container">
     <h2>Ciao {{ user.username }}!</h2>
 
@@ -101,7 +119,11 @@
     <h3>Vacanze Consigliate</h3>
 
     {% if vacations.count > 0 %}
-        <p>Le seguenti vacanze sono raccomandate perché condividono il parametro comune: <strong>{{ param }}</strong>.</p>
+        <p>Le seguenti vacanze sono raccomandate perché condividono i parametri comuni:</p>
+            {% for p in param %}
+                <strong>{{ p }}</strong>
+            {% endfor %}
+        <br>
         <div class="recommended-vacations">
             {% for v in vacations %}
                 <div class="vacation-card">
@@ -124,4 +146,3 @@
 </div>
 
 {% endblock %}
-

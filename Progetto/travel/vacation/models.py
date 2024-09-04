@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+# Modello per le vacanze
 class Vacation(models.Model):
     SEASON_CHOICES = [
         ('Inverno', 'Inverno'),
@@ -58,6 +59,7 @@ class Vacation(models.Model):
         return self.titolo
 
 
+# Modello per le liste
 class List(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='list')
     name = models.CharField(max_length=100)
@@ -67,6 +69,7 @@ class List(models.Model):
         return f"{self.name}"
 
 
+# Modello per il profilo utente
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_image = models.ImageField(upload_to='profile_images/', default='default.jpg')

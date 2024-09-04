@@ -1,42 +1,36 @@
-from collections import Counter
-
-from django.db.models import Count, Q
-from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
-from .models import Vacation, List, UserProfile
-from .forms import AddToListForm, VacationSearchForm, RemoveFromListForm, UserProfileForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
 from braces import views
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from collections import Counter
+from django.db.models import Count, Q
+from .models import Vacation, List, UserProfile
+from .forms import AddToListForm, VacationSearchForm, RemoveFromListForm, UserProfileForm, VacationForm
 
 
+# FBV per lista vacanze
 class VacationListView(ListView):
     model = Vacation
     template_name = "vacation/vacationlist.html"
 
 
+# CBV dedicate alla gestione del database: riservate agli admin
+# CBV per la creazione di una nuova vacanza
 class CreateVacationView(views.SuperuserRequiredMixin, CreateView):
     model = Vacation
     template_name = "vacation/create_vacation.html"
-    fields = '__all__'
-    success_url = reverse_lazy("vacation:vacationlist")
+    form_class = VacationForm  # Usa il modulo personalizzato
 
-    def handle_no_permission(self, request):
-        return redirect('not_authorized')
+    def form_valid(self, form):
+        messages.success(self.request, "Vacanza creata con successo!")
+        return super().form_valid(form)
 
-
-class DetailVacationView(DetailView):
-    model = Vacation
-    template_name = "vacation/vacation.html"
-
-
-class UpdateVacationView(views.SuperuserRequiredMixin,UpdateView):
-    model = Vacation
-    template_name = "vacation/edit_vacation.html"
-    fields = "__all__"
+    def form_invalid(self, form):
+        messages.error(self.request, "Errore durante la creazione della vacanza.")
+        return super().form_invalid(form)
 
     def handle_no_permission(self, request):
         return redirect('not_authorized')
@@ -46,6 +40,29 @@ class UpdateVacationView(views.SuperuserRequiredMixin,UpdateView):
         return reverse("vacation:detailvacation", kwargs={'pk': pk})
 
 
+# CBV per la modifica di una vacanza
+class UpdateVacationView(views.SuperuserRequiredMixin, UpdateView):
+    model = Vacation
+    template_name = "vacation/edit_vacation.html"
+    form_class = VacationForm  # Usa il modulo personalizzato
+
+    def form_valid(self, form):
+        messages.success(self.request, "Vacanza modificata con successo!")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Errore durante la modifica della vacanza.")
+        return super().form_invalid(form)
+
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
+
+    def get_success_url(self):
+        pk = self.get_context_data()["object"].pk
+        return reverse("vacation:detailvacation", kwargs={'pk': pk})
+
+
+# CBV per l'eliminazione di una vacanza
 class DeleteVacationView(views.SuperuserRequiredMixin, DeleteView):
     model = Vacation
     template_name = "vacation/delete_vacation.html"
@@ -56,7 +73,17 @@ class DeleteVacationView(views.SuperuserRequiredMixin, DeleteView):
     def get_success_url(self):
         return reverse("vacation:vacationlist")
 
+    def form_valid(self, form):
+        messages.success(self.request, "Vacanza eliminata con successo!")
+        return super().form_valid(form)
 
+    def form_invalid(self, form):
+        messages.error(self.request,
+                       "Errore durante l'eliminazione della vacanza")
+        return super().form_invalid(form)
+
+
+# CBV per il profilo utente
 @login_required(login_url=reverse_lazy('not_authorized'))
 def my_profile(request):
     # Controlla se l'utente ha già un profilo
@@ -69,7 +96,6 @@ def my_profile(request):
     # Ottieni le raccomandazioni delle vacanze per l'utente
     recommended_vacations, most_common_param = recommend_vacations(user)
 
-    # Passa sia i dati del profilo che le vacanze raccomandate al template
     return render(request, 'vacation/myprofile.html', {
         'user': user,
         'vacations': recommended_vacations,
@@ -77,19 +103,24 @@ def my_profile(request):
     })
 
 
+# FBV per modifica foto
 @login_required(login_url=reverse_lazy('not_authorized'))
 def change_pic(request):
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
         if form.is_valid():
             form.save()
-            return redirect('vacation:change_picture')  # Dopo aver cambiato la foto, redirigi l'utente al profilo
+            messages.success(request, 'Immagine del profilo aggiornata con successo!')
+            return redirect('vacation:myprofile')
+        else:
+            messages.error(request, 'Si è verificato un errore. Per favore, riprova.')
     else:
         form = UserProfileForm(instance=request.user.userprofile)
 
     return render(request, 'vacation/change_picture.html', {'form': form})
 
 
+# CBV per il dettaglio di una vacanza
 class VacationDetailView(FormView, DetailView):
     model = Vacation
     template_name = 'vacation/vacation.html'
@@ -119,21 +150,26 @@ class VacationDetailView(FormView, DetailView):
         fatti_list_name = 'Fatte'
         da_fare_list_name = 'Da Fare'
 
+        # Recupera le due liste
         fatti_list = List.objects.filter(user=self.request.user, name=fatti_list_name).first()
         da_fare_list = List.objects.filter(user=self.request.user, name=da_fare_list_name).first()
 
+        # se la lista e' quella "Fatte"
         if selected_list.name == fatti_list_name:
+            # se la vacanza e' presente nella lista "Da Fare" la rimuove
             if da_fare_list and da_fare_list.vacations.filter(pk=vacation.pk).exists():
                 da_fare_list.vacations.remove(vacation)
                 messages.info(self.request,
                               f'La vacanza "{vacation.titolo}" è stata rimossa dalla lista "{da_fare_list_name}".')
-
+        # se la lista e' quella "Da Fare"
         elif selected_list.name == da_fare_list_name:
+            # se la vacaza e' presente nella lista "Fatte" compare un messaggio di avviso
             if fatti_list and fatti_list.vacations.filter(pk=vacation.pk).exists():
                 messages.warning(self.request,
                                  f'La vacanza "{vacation.titolo}" è già nella lista "{fatti_list_name}" e non può essere aggiunta a "{da_fare_list_name}".')
                 return redirect('vacation:detailvacation', pk=vacation.pk)
 
+        # se la vacanza e' gia' presente nella lista scelta, compare un messaggio di avviso
         if selected_list.vacations.filter(pk=vacation.pk).exists():
             messages.warning(self.request, f'La vacanza "{vacation.titolo}" è già nella lista "{selected_list.name}".')
         else:
@@ -178,42 +214,7 @@ class VacationDetailView(FormView, DetailView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class DoneVacations(views.LoginRequiredMixin, ListView):
-    model = List
-    template_name = "vacation/donevacations.html"
-    context_object_name = "List"
-
-    def handle_no_permission(self, request):
-        return redirect('not_authorized')
-
-    def get_queryset(self):
-        return List.objects.filter(user=self.request.user).filter(name='Fatte')
-
-
-class ToDoVacations(views.LoginRequiredMixin, ListView):
-    model = List
-    template_name = "vacation/todovacations.html"
-    context_object_name = "List"
-
-    def handle_no_permission(self, request):
-        return redirect('not_authorized')
-
-    def get_queryset(self):
-        return List.objects.filter(user=self.request.user).filter(name='Da Fare')
-
-
-class LikedVacations(views.LoginRequiredMixin, ListView):
-    model = Vacation
-    template_name = "vacation/likedvacations.html"
-    context_object_name = "Liked"
-
-    def handle_no_permission(self, request):
-        return redirect('not_authorized')
-
-    def get_queryset(self):
-        return Vacation.objects.filter(like=self.request.user)
-
-
+# CBV per mettere like a una vacanza
 @login_required(login_url=reverse_lazy('not_authorized'))
 def like_vacation(request, pk):
     # Recupera l'oggetto Scheda
@@ -223,7 +224,7 @@ def like_vacation(request, pk):
     fatte_list = List.objects.filter(user=request.user, name="Fatte").first()
 
     if fatte_list and fatte_list.vacations.filter(pk=vacation.pk).exists():
-        # Controlla se l'utente ha già messo un like a questa vacanza
+        # Controlla se l'utente ha già messo un like a questa vacanza, se si' lo toglie
         if request.user in vacation.like.all():
             vacation.like.remove(request.user)
             messages.info(request, f'Hai rimosso il like dalla vacanza "{vacation.titolo}".')
@@ -237,6 +238,46 @@ def like_vacation(request, pk):
     return redirect(reverse("vacation:detailvacation", kwargs={"pk": pk}))
 
 
+# CBV per lista di vacanze fatte da un utente
+class DoneVacations(views.LoginRequiredMixin, ListView):
+    model = List
+    template_name = "vacation/donevacations.html"
+    context_object_name = "List"
+
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
+
+    def get_queryset(self):
+        return List.objects.filter(user=self.request.user).filter(name='Fatte')
+
+
+# CBV per liste di vacanze da fare di un utente
+class ToDoVacations(views.LoginRequiredMixin, ListView):
+    model = List
+    template_name = "vacation/todovacations.html"
+    context_object_name = "List"
+
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
+
+    def get_queryset(self):
+        return List.objects.filter(user=self.request.user).filter(name='Da Fare')
+
+
+# CBV per lista di vacanze a cui l'utente ha messo like
+class LikedVacations(views.LoginRequiredMixin, ListView):
+    model = Vacation
+    template_name = "vacation/likedvacations.html"
+    context_object_name = "Liked"
+
+    def handle_no_permission(self, request):
+        return redirect('not_authorized')
+
+    def get_queryset(self):
+        return Vacation.objects.filter(like=self.request.user)
+
+
+# CBV per ricerca vacanze
 def search_vacation(request):
     form = VacationSearchForm(request.GET or None)
     vacations = None
@@ -264,7 +305,7 @@ def search_vacation(request):
 
 
 def recommend_vacations(user):
-    # Recupera le vacanze che l'utente ha piaciuto
+    # Recupera le vacanze a cui l'utente ha messo like
     liked_vacations = Vacation.objects.filter(like=user)
 
     # Recupera tutte le vacanze nelle liste "da fare" dell'utente
@@ -290,19 +331,23 @@ def recommend_vacations(user):
             vacation.prezzo
         ])
 
-    # Trova il parametro più comune tra tutte le categorie
+    # Trova i parametri più comuni tra tutte le categorie
     if params:
-        most_common_param, most_common_count = Counter(params).most_common(1)[0]
+        param_counts = Counter(params)
+        max_count = max(param_counts.values())
+        most_common_params = [param for param, count in param_counts.items() if count == max_count]
     else:
         return Vacation.objects.none(), None
 
-    # Costruisci una query per cercare vacanze che corrispondono al parametro più comune
-    query = (
-        Q(continente=most_common_param) |
-        Q(durata=most_common_param) |
-        Q(tipologia=most_common_param) |
-        Q(prezzo=most_common_param)
-    )
+    # Costruisci una query per cercare vacanze che corrispondono a uno dei parametri più comuni
+    query = Q()
+    for param in most_common_params:
+        query |= (
+            Q(continente=param) |
+            Q(durata=param) |
+            Q(tipologia=param) |
+            Q(prezzo=param)
+        )
 
     # Filtra le vacanze che non sono già state conosciute dall'utente
     filtered_vacations = Vacation.objects.filter(query).exclude(id__in=known_vacation_ids)
@@ -310,4 +355,4 @@ def recommend_vacations(user):
     # Ordina le vacanze in base al numero di "like" e limita i risultati a 5
     recommended_vacations = filtered_vacations.annotate(num_likes=Count('like')).order_by('-num_likes')[:5]
 
-    return recommended_vacations, most_common_param
+    return recommended_vacations, most_common_params

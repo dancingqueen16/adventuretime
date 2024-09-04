@@ -1,11 +1,11 @@
-# Test sulla funzione 'reccomend_vacations' per i consigli di viaggio
-
 from django.test import TestCase
 from django.contrib.auth.models import User
 from .models import Vacation, List
 from .views import recommend_vacations
+from django.urls import reverse
 
 
+# Test sulla funzione 'reccomend_vacations' per i consigli di viaggio
 class RecommendVacationsTestCase(TestCase):
 
     def setUp(self):
@@ -17,8 +17,8 @@ class RecommendVacationsTestCase(TestCase):
             titolo="Viaggio Culturale in Europa",
             luogo="Parigi, Bruxelles, Amsterdam, Berlino",
             continente="Europa",
-            durata="2 Settimane",
-            prezzo="Budget Medio",
+            durata="2 Settimane",  # Parametro Comune
+            prezzo="Budget Medio",  # Parametro comune
             tipologia="Culturale",
             periodo="Primavera"
         )
@@ -32,7 +32,7 @@ class RecommendVacationsTestCase(TestCase):
             periodo="Estate"
         )
 
-        # Creazione di vacanze di esempio NON conosciute dall'utente
+        # Creazione di vacanze di esempio non conosciute e non corrispondenti ai parametri di quelle conosciute
         self.vacation3 = Vacation.objects.create(
             titolo='Relax sulla Costa del Brasile',
             luogo='Rio de Janeiro, Brasile',
@@ -52,7 +52,7 @@ class RecommendVacationsTestCase(TestCase):
             periodo='Autunno'
         )
 
-        # Creazione di vacanze che corrispondono al parametro più comune
+        # Creazione di vacanze che corrispondono al parametro più comune e non sono conosciute
         self.vacation5 = Vacation.objects.create(
             titolo="Escursione in Europa",
             luogo="Spagna",
@@ -80,7 +80,7 @@ class RecommendVacationsTestCase(TestCase):
         self.todo_list.vacations.add(self.vacation2)
 
     def test_recommend_vacations(self):
-        recommended_vacations, most_common_param = recommend_vacations(self.user)
+        recommended_vacations, most_common_params = recommend_vacations(self.user)
 
         # Verifica che le vacanze gia' conosciute non siano consigliate
         self.assertNotIn(self.vacation1, recommended_vacations)
@@ -95,29 +95,23 @@ class RecommendVacationsTestCase(TestCase):
         self.assertIn(self.vacation6, recommended_vacations)
 
         # Verifica che il parametro più comune sia corretto
-        self.assertEqual(most_common_param, '2 Settimane')  # In questo caso "2 Settimane" dovrebbe essere il più comune
+        self.assertIn('2 Settimane', most_common_params)  # In questo caso "2 Settimane" dovrebbe essere il più comune
 
     def test_recommend_vacations_no_likes_or_todo(self):
         # Crea un utente senza like o vacanze "Da Fare"
         new_user = User.objects.create(username="newuser")
 
-        recommended_vacations, most_common_param = recommend_vacations(new_user)
+        recommended_vacations, most_common_params = recommend_vacations(new_user)
 
         # Verifica che nessuna vacanza venga raccomandata
         self.assertFalse(recommended_vacations)
-        self.assertIsNone(most_common_param)
+        self.assertIsNone(most_common_params)
+
 
 # Test sulla vista di ricerca viaggi
-from django.test import TestCase
-from django.urls import reverse
-from .models import Vacation
-from django.core.cache import cache
-
-
 class SearchVacationViewTestCase(TestCase):
 
     def setUp(self):
-        cache.clear()
         # Creazione di alcune vacanze di esempio
         self.vacation1 = Vacation.objects.create(
             titolo="Weekend a Parigi",
@@ -157,6 +151,7 @@ class SearchVacationViewTestCase(TestCase):
             periodo="Inverno"
         )
 
+    # Test ricerca per continente
     def test_search_vacation_by_continent(self):
         response = self.client.get(reverse('vacation:search_vacations'), {'continente': 'Europa'})
         self.assertEqual(response.status_code, 200)
@@ -165,6 +160,47 @@ class SearchVacationViewTestCase(TestCase):
         self.assertNotContains(response, self.vacation3.titolo)
         self.assertNotContains(response, self.vacation4.titolo)
 
+    # Test ricerca per tipo
+    def test_search_vacation_by_type(self):
+        response = self.client.get(reverse('vacation:search_vacations'), {'tipologia': 'Avventura'})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, self.vacation1.titolo)
+        self.assertContains(response, self.vacation2.titolo)
+        self.assertNotContains(response, self.vacation3.titolo)
+        self.assertContains(response, self.vacation4.titolo)
+
+    # Test ricerca per durata
+    def test_search_vacation_by_duration(self):
+        response = self.client.get(reverse('vacation:search_vacations'), {'durata': '2 Settimane'})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, self.vacation1.titolo)
+        self.assertNotContains(response, self.vacation2.titolo)
+        self.assertContains(response, self.vacation3.titolo)
+        self.assertContains(response, self.vacation4.titolo)
+
+    # Test ricerca per budget
+    def test_search_vacation_by_budget(self):
+        response = self.client.get(reverse('vacation:search_vacations'), {'prezzo': 'Budget Medio'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.vacation1.titolo)
+        self.assertNotContains(response, self.vacation2.titolo)
+        self.assertContains(response, self.vacation3.titolo)
+        self.assertNotContains(response, self.vacation4.titolo)
+
+    # Test ricerca con filtri multipli
+    def test_search_vacation_multiple_filters(self):
+        response = self.client.get(reverse('vacation:search_vacations'), {
+            'continente': 'Asia',
+            'durata': '2 Settimane',
+            'tipologia': 'Culturale'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.vacation3.titolo)  # Vacanza che corrisponde a tutti i filtri
+        self.assertNotContains(response, self.vacation1.titolo)  # Non dovrebbe comparire
+        self.assertNotContains(response, self.vacation2.titolo)  # Non dovrebbe comparire
+        self.assertNotContains(response, self.vacation1.titolo)
+
+    # Test ricerca senza filtri (parametro 'Tutti' per ciascuna categoria)
     def test_search_vacation_no_filters(self):
         response = self.client.get(reverse('vacation:search_vacations'), {
             'continente': '',
@@ -178,42 +214,7 @@ class SearchVacationViewTestCase(TestCase):
         self.assertContains(response, self.vacation3.titolo)
         self.assertContains(response, self.vacation4.titolo)
 
-    def test_search_vacation_by_type(self):
-        response = self.client.get(reverse('vacation:search_vacations'), {'tipologia': 'Avventura'})
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, self.vacation1.titolo)
-        self.assertContains(response, self.vacation2.titolo)
-        self.assertNotContains(response, self.vacation3.titolo)
-        self.assertContains(response, self.vacation4.titolo)
-
-    def test_search_vacation_by_duration(self):
-        response = self.client.get(reverse('vacation:search_vacations'), {'durata': '2 Settimane'})
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, self.vacation1.titolo)
-        self.assertNotContains(response, self.vacation2.titolo)
-        self.assertContains(response, self.vacation3.titolo)
-        self.assertContains(response, self.vacation4.titolo)
-
-    def test_search_vacation_by_budget(self):
-        response = self.client.get(reverse('vacation:search_vacations'), {'prezzo': 'Budget Medio'})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.vacation1.titolo)
-        self.assertNotContains(response, self.vacation2.titolo)
-        self.assertContains(response, self.vacation3.titolo)
-        self.assertNotContains(response, self.vacation4.titolo)
-
-    def test_search_vacation_multiple_filters(self):
-        response = self.client.get(reverse('vacation:search_vacations'), {
-            'continente': 'Asia',
-            'durata': '2 Settimane',
-            'tipologia': 'Culturale'
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.vacation3.titolo)  # Vacanza che corrisponde a tutti i filtri
-        self.assertNotContains(response, self.vacation1.titolo)  # Non dovrebbe comparire
-        self.assertNotContains(response, self.vacation2.titolo)  # Non dovrebbe comparire
-        self.assertNotContains(response, self.vacation1.titolo)
-
+    # Test ricerca senza match
     def test_search_vacation_no_match(self):
         response = self.client.get(reverse('vacation:search_vacations'), {
             'continente': 'Oceania'

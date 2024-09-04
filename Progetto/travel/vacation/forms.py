@@ -2,6 +2,13 @@ from django import forms
 from .models import List, Vacation, UserProfile
 
 
+class VacationForm(forms.ModelForm):
+    class Meta:
+        model = Vacation
+        exclude = ['like']  # Escludi il campo 'like'
+
+
+# Form per aggiungere vacanze a una lista
 class AddToListForm(forms.Form):
     LIST_CHOICES = [
         ('Fatte', 'Fatte'),
@@ -18,15 +25,17 @@ class AddToListForm(forms.Form):
         super(AddToListForm, self).__init__(*args, **kwargs)
         self.user = user
 
+    # Metodo che ritorna la lista selezionata o la crea in caso non esista
     def get_or_create_list(self):
         list_name = self.cleaned_data['list']
-        list, created = List.objects.get_or_create(
+        lista, created = List.objects.get_or_create(
             name=list_name,
             user=self.user
         )
-        return list
+        return lista
 
 
+# Form per la rimozione di una vacanza da una lista
 class RemoveFromListForm(forms.Form):
     list = forms.ChoiceField(
         label="Seleziona Lista",
@@ -48,6 +57,7 @@ class RemoveFromListForm(forms.Form):
         selected_list.vacations.remove(self.vacation)
 
 
+# Form per la ricerca di vacanze
 class VacationSearchForm(forms.Form):
     # Aggiungiamo un'opzione vuota all'inizio delle scelte
     continente = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.CONTINENT_CHOICES, required=False)
@@ -56,6 +66,7 @@ class VacationSearchForm(forms.Form):
     prezzo = forms.ChoiceField(choices=[('', 'Tutti')] + Vacation.PRICE_CHOICES, required=False)
 
 
+# Form per cambiare immagine profilo
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
