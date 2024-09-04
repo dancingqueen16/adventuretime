@@ -1,14 +1,33 @@
 {% extends 'base.html' %}
 
+{% block head %} Crea Vacanza {% endblock %}
+
 {% block title %} Crea Vacanza {% endblock %}
 
-{% block content %} 
+{% block content %}
+
+<style>
+    .btn {
+        border-radius: 20px;
+        padding: 8px 15px;
+        font-size: 1em;
+        border: none;
+        cursor: pointer;
+        background-color: #eaf1f6;
+        color: #666;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+</style>
 
 <h1> Crea Vacanza </h1>
 
 <form method="post">{% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Save">
+    <input type="submit" class="btn" value="Salva">
 </form>
 
 {% endblock %}

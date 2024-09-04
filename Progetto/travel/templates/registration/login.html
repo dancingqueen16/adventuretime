@@ -4,6 +4,8 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
       integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
+{% block head %} Login {% endblock %}
+
 {% block title %} Login {% endblock %}
 
 {% block header1 %}
@@ -12,6 +14,19 @@
 {% endblock %}
 
 {% block content %}
+
+<style>
+  .btn {
+     border-radius: 20px;
+        padding: 8px 15px;
+        font-size: 1em;
+        border: none;
+        cursor: pointer;
+        background-color: #eaf1f6;
+        margin-top: 10px;
+  }
+
+</style>
 
 {% if "notok" in request.GET.auth %}
 <div class="alert alert-danger" role="alert">
@@ -23,7 +38,7 @@
 
   {{form | crispy}}
 
-  <input type="submit" class="btn btn-success" value="Esegui login">
+  <input type="submit" class="btn" value="Esegui login">
 
 </form>
 

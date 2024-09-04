@@ -1,35 +1,127 @@
 {% extends "base.html" %} {% load static %}
 
-{% block head %} {% endblock %}
+{% block head %} Profilo {% endblock %}
 
 {% block title %} Profilo {% endblock %}
 
 {% block content %}
 
-    <h2>Ciao {{user.username}}!</h2>
+<style>
+    .profile-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .profile-container h2 {
+        font-size: 2em;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .profile-container img {
+        border-radius: 50%;
+        border: 5px solid #e1e1e1;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        margin-bottom: 20px;
+    }
+
+    .profile-container a.change-picture {
+        display: inline-block;
+        margin-top: 10px;
+        color: #666;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 20px;
+        padding: 8px 15px;
+        border: 1px solid #666;
+    }
+
+    .profile-container a.change-picture:hover {
+        opacity: 0.8;
+    }
+
+    .recommended-vacations {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .vacation-card {
+        background-color: #f1f1f1;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        max-width: 250px;
+        text-align: center;
+        width: 100%;
+    }
+
+    .vacation-card a {
+        text-decoration: none;
+        color: #34495e;
+        font-size: 1.1em;
+        font-weight: bold;
+    }
+
+    .vacation-card a:hover {
+        opacity: 0.8;
+    }
+
+    .vacation-card p {
+        margin: 10px 0;
+        color: #666;
+    }
+
+    .profile-links a {
+        display: inline-block;
+        margin: 10px;
+        color: #666;
+        text-decoration: none;
+        border-radius: 20px;
+        padding: 10px 20px;
+        background-color: #eaf1f6;
+    }
+
+    .profile-links a:hover {
+        opacity: 0.8;
+    }
+</style>
+
+<div class="profile-container">
+    <h2>Ciao {{ user.username }}!</h2>
 
     <img src="{% if user.userprofile.profile_image %}{{ user.userprofile.profile_image.url }}{% else %} {% static 'profile_images/default.jpg' %} {% endif %}" alt="Immagine di profilo">
-    <a href="{% url 'vacation:change_picture' %}">Cambia immagine</a>
-    <h4>Vacanze Consigliate</h4>
+    <a href="{% url 'vacation:change_picture' %}" class="change-picture">Cambia immagine</a>
+
+    <h3>Vacanze Consigliate</h3>
 
     {% if vacations.count > 0 %}
-       <p>Le seguenti vacanze sono raccomandate perché condividono il valore comune: <strong>{{ param }}</strong>.</p>
-        {% for v in vacations %}
-
-            <div class="card">
-                <a href="{% url 'vacation:detailvacation' v.pk %}">{{v}}</a>
-                <p>{{v.luogo}}</p>
-                <p>{{v.descrizione}}</p>
-            </div>
-
-        {% endfor %}
+        <p>Le seguenti vacanze sono raccomandate perché condividono il parametro comune: <strong>{{ param }}</strong>.</p>
+        <div class="recommended-vacations">
+            {% for v in vacations %}
+                <div class="vacation-card">
+                    <a href="{% url 'vacation:detailvacation' v.pk %}">{{ v.titolo }}</a>
+                    <p> <strong>{{ v.luogo }}</strong></p>
+                    <p>{{ v.descrizione }}</p>
+                </div>
+            {% endfor %}
+        </div>
     {% else %}
         <p>Non ci sono proposte!</p>
     {% endif %}
 
-<a href="{% url 'vacation:likedvacations' %}">Vacanze Piaciute</a>
-<a href="{% url 'vacation:donevacations' %}">Vacanze Fatte</a>
-<a href="{% url 'vacation:todovacations' %}">Vacanze da Fare</a>
+    <div class="profile-links">
+        <a href="{% url 'vacation:likedvacations' %}">Vacanze Piaciute</a>
+        <a href="{% url 'vacation:donevacations' %}">Vacanze Fatte</a>
+        <a href="{% url 'vacation:todovacations' %}">Vacanze da Fare</a>
+    </div>
+
+</div>
 
 {% endblock %}
 

@@ -1,22 +1,109 @@
 {% extends "base.html" %}
 
-{% block content %}
-<h1>Ricerca Vacanze</h1>
-<form method="get">
-    {{ form.as_p }}
-    <button type="submit">Cerca</button>
-</form>
+{% block head %} Ricerca Vacanze {% endblock %}
 
-<h4>Risultati della Ricerca:</h4>
-<ul>
-    {% for v in vacations %}
-        <li>
-            <a href="{% url 'vacation:detailvacation' v.pk %}">{{ v.titolo }}</a>
-            - {{ v.luogo }} - {{v.descrizione}}
-        </li>
-    {% empty %}
-        <li>Nessun risultato trovato.</li>
-    {% endfor %}
-</ul>
+{% block content %}
+
+<style>
+    .search-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .search-container h1 {
+        font-size: 2em;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .search-container form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 600px;
+        margin-bottom: 20px;
+    }
+
+    .search-container form button {
+        border-radius: 20px;
+        padding: 10px 20px;
+        font-size: 1em;
+        border: none;
+        cursor: pointer;
+        background-color: #eaf1f6;
+        margin-top: 10px;
+    }
+
+    .search-container form button:hover {
+        background-color: #d3e0ea;
+    }
+
+    .results-header {
+        font-size: 1.5em;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .vacation-card {
+        background-color: #eaf1f6;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 300px;
+        width: 100%;
+    }
+
+    .vacation-card a {
+        text-decoration: none;
+        color: #34495e;
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    .vacation-card a:hover {
+        opacity: 0.8;
+    }
+
+    .vacation-card p {
+        margin: 10px 0;
+        color: #555;
+    }
+
+    .vacation-cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+</style>
+
+<div class="search-container">
+    <h1>Ricerca Vacanze</h1>
+
+    <form method="get">
+        {{ form.as_p }}
+        <button type="submit">Cerca</button>
+    </form>
+
+    <h4 class="results-header">Risultati della Ricerca:</h4>
+    <div class="vacation-cards-container">
+        {% for v in vacations %}
+            <div class="vacation-card">
+                <a href="{% url 'vacation:detailvacation' v.pk %}">{{ v.titolo }}</a>
+                <p> <strong>{{ v.luogo }}</strong></p>
+                <p>{{ v.descrizione }}</p>
+            </div>
+        {% empty %}
+            <div class="vacation-card">
+                <p>Nessun risultato trovato.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 
 {% endblock %}

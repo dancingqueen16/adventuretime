@@ -1,16 +1,70 @@
 {% extends 'base.html' %}
 
+{% block head %} Modifica Vacanze {% endblock %}
+
 {% block title %} {{object.titolo}} {% endblock %} 
 
-{% block content %} 
+{% block content %}
 
-<h1> Modifica Vacanza {{object.titolo}} </h1>
+<style>
+    .edit-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
 
-<form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Modifica">
-</form>
+    .edit-container h1 {
+        font-size: 2em;
+        color: #34495e;
+        margin-bottom: 20px;
+        text-align: center;
+    }
 
-<a href="{% url 'vacation:detailvacation' object.pk %}">Indietro</a>
+    .edit-container form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 500px;
+        margin-bottom: 20px;
+    }
+
+    .edit-container form input[type="submit"] {
+        border-radius: 20px;
+        padding: 10px 20px;
+        font-size: 1em;
+        border: none;
+        cursor: pointer;
+        background-color: #eaf1f6;
+        margin-top: 10px;
+    }
+
+    .edit-container form input[type="submit"]:hover {
+        background-color: #d3e0ea;
+    }
+
+    .edit-container a {
+        margin-top: 20px;
+        color: #34495e;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .edit-container a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="edit-container">
+    <h2>Modifica {{object.titolo}}</h2>
+
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Modifica">
+    </form>
+
+    <a href="{% url 'vacation:detailvacation' object.pk %}">Indietro</a>
+</div>
 
 {% endblock %}

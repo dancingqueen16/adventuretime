@@ -1,17 +1,65 @@
 {% extends "base.html" %} {% load static %}
 
-{% block head %} {% endblock %}
+{% block head %} Profilo {% endblock %}
 
 {% block title %} Profilo {% endblock %}
 
 {% block content %}
 
-   <h2>Cambia la tua immagine di profilo</h2>
-    <img src="{% if user.userprofile.profile_image %}{{ user.userprofile.profile_image.url }}{% else %} {% static 'profile_images/default.jpg' %} {% endif %}" alt="Immagine di profilo">
+
+<style>
+    .profile-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .profile-container h2 {
+        font-size: 1.5em;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .profile-container img {
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-container form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-container form button {
+        border-radius: 20px;
+        padding: 10px 20px;
+        font-size: 1em;
+        border: none;
+        cursor: pointer;
+        background-color: #eaf1f6;
+        margin-top: 10px;
+    }
+
+    .profile-container form button:hover {
+        background-color: #d3e0ea;
+    }
+</style>
+
+<div class="profile-container">
+    <h2>Cambia la tua immagine di profilo</h2>
+    <img src="{% if user.userprofile.profile_image %}{{ user.userprofile.profile_image.url }}{% else %}{% static 'profile_images/default.jpg' %}{% endif %}" alt="Immagine di profilo">
+
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Aggiorna Immagine</button>
     </form>
+</div>
 
 {% endblock %}
